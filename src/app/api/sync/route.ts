@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { syncWebUntis } from "@/lib/webuntis/service";
+import { getAdapter } from "@/lib/platforms/registry";
+import type { PlatformId } from "@/lib/platforms/types";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -49,21 +50,21 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!child.webuntis_server || !child.webuntis_school) {
-    return NextResponse.json(
-      { error: "WebUntis ist für dieses Kind nicht konfiguriert" },
-      { status: 400 }
-    );
+  // Determine platform – fall back to webuntis for legacy children
+  const platformId: PlatformId = (child.platform as PlatformId) || "webuntis";
+  const platformConfig: Record<string, string> = child.platform_config || {};
+
+  // Legacy support: populate config from old webuntis_* columns if needed
+  if (platformId === "webuntis" && !platformConfig.server) {
+    if (child.webuntis_server) platformConfig.server = child.webuntis_server;
+    if (child.webuntis_school) platformConfig.school = child.webuntis_school;
   }
 
   try {
-    // Fetch data from WebUntis - credentials are ONLY used here and discarded after
-    const result = await syncWebUntis(
-      child.webuntis_server,
-      child.webuntis_school,
-      username,
-      password
-    );
+    const adapter = getAdapter(platformId);
+
+    // Fetch data – credentials are ONLY used here and discarded after
+    const result = await adapter.sync(platformConfig, { username, password });
 
     // Delete old data for this child
     await Promise.all([
@@ -132,16 +133,16 @@ export async function POST(request: Request) {
     const message =
       error instanceof Error ? error.message : "Unbekannter Fehler";
 
-    // Common WebUntis errors
-    if (message.includes("401") || message.includes("auth")) {
+    // Common auth errors
+    if (message.includes("401") || message.includes("auth") || message.includes("fehlgeschlagen")) {
       return NextResponse.json(
-        { error: "WebUntis-Zugangsdaten sind ungültig" },
+        { error: message.includes("fehlgeschlagen") ? message : "Zugangsdaten sind ungültig" },
         { status: 401 }
       );
     }
-    if (message.includes("ENOTFOUND") || message.includes("network")) {
+    if (message.includes("ENOTFOUND") || message.includes("network") || message.includes("erreichbar")) {
       return NextResponse.json(
-        { error: "WebUntis-Server nicht erreichbar. Prüfe den Servernamen." },
+        { error: message.includes("erreichbar") ? message : "Server nicht erreichbar. Prüfe die Verbindungsdaten." },
         { status: 502 }
       );
     }
