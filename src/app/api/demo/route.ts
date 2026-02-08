@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { DEMO_LESSONS, generateDemoSubstitutions } from "@/lib/webuntis/demo-data";
+import { DEMO_LESSONS, generateDemoSubstitutions, generateDemoMessages, generateDemoHomework } from "@/lib/webuntis/demo-data";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -40,6 +40,8 @@ export async function POST(request: Request) {
   await Promise.all([
     supabase.from("lessons").delete().eq("child_id", childId),
     supabase.from("substitutions").delete().eq("child_id", childId),
+    supabase.from("messages").delete().eq("child_id", childId),
+    supabase.from("homework").delete().eq("child_id", childId),
   ]);
 
   // Insert demo lessons
@@ -73,6 +75,33 @@ export async function POST(request: Request) {
 
   await supabase.from("substitutions").insert(subsToInsert);
 
+  // Insert demo messages
+  const demoMessages = generateDemoMessages();
+  const messagesToInsert = demoMessages.map((m) => ({
+    child_id: childId,
+    external_id: m.id,
+    title: m.title,
+    body: m.body,
+    sender: m.sender,
+    date: m.date,
+    read: m.read,
+  }));
+
+  await supabase.from("messages").insert(messagesToInsert);
+
+  // Insert demo homework
+  const demoHomework = generateDemoHomework();
+  const homeworkToInsert = demoHomework.map((h) => ({
+    child_id: childId,
+    external_id: h.id,
+    subject: h.subject,
+    description: h.description,
+    due_date: h.dueDate,
+    completed: h.completed,
+  }));
+
+  await supabase.from("homework").insert(homeworkToInsert);
+
   // Update last_synced_at and fill in demo school info
   await supabase
     .from("children")
@@ -87,6 +116,8 @@ export async function POST(request: Request) {
     success: true,
     lessonsCount: DEMO_LESSONS.length,
     substitutionsCount: demoSubs.length,
+    messagesCount: demoMessages.length,
+    homeworkCount: demoHomework.length,
     demo: true,
   });
 }
