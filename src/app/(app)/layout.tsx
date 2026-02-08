@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app-shell";
+import { InstallPrompt } from "@/components/install-prompt";
 
 export default async function AppLayout({
   children,
@@ -19,6 +20,7 @@ export default async function AppLayout({
   return (
     <AppShell userName={name} userEmail={user.email || ""}>
       {children}
+      <InstallPrompt />
     </AppShell>
   );
 }
