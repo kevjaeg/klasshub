@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, School, Clock } from "lucide-react";
 import Link from "next/link";
 import type { Child } from "@/lib/types";
+import { PLATFORMS } from "@/lib/platforms/registry";
+import type { PlatformId } from "@/lib/platforms/types";
 
 export default async function ChildrenPage() {
   const supabase = await createClient();
@@ -64,7 +66,12 @@ export default async function ChildrenPage() {
                       {child.school_name}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right space-y-1">
+                    {child.platform && PLATFORMS[child.platform as PlatformId] && (
+                      <Badge variant="secondary" className={`text-xs ${PLATFORMS[child.platform as PlatformId].color}`}>
+                        {PLATFORMS[child.platform as PlatformId].name}
+                      </Badge>
+                    )}
                     {child.last_synced_at ? (
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />

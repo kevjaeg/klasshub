@@ -7,19 +7,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Check } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { PLATFORMS } from "@/lib/platforms/registry";
+import type { PlatformId, PlatformInfo } from "@/lib/platforms/types";
+
+const platformList = Object.values(PLATFORMS);
 
 export default function AddChildPage() {
   const [name, setName] = useState("");
   const [schoolName, setSchoolName] = useState("");
   const [className, setClassName] = useState("");
-  const [webuntisSchool, setWebuntisSchool] = useState("");
-  const [webuntisServer, setWebuntisServer] = useState("");
+  const [selectedPlatform, setSelectedPlatform] = useState<PlatformId | null>(null);
+  const [platformConfig, setPlatformConfig] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+
+  const selectedPlatformInfo: PlatformInfo | null = selectedPlatform
+    ? PLATFORMS[selectedPlatform]
+    : null;
+
+  function handlePlatformFieldChange(key: string, value: string) {
+    setPlatformConfig((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handlePlatformSelect(id: PlatformId) {
+    setSelectedPlatform(id);
+    setPlatformConfig({});
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,14 +49,23 @@ export default function AddChildPage() {
       return;
     }
 
-    const { data, error } = await supabase.from("children").insert({
+    // Build insert data
+    const insertData: Record<string, unknown> = {
       user_id: user.id,
       name,
       school_name: schoolName,
       class_name: className || null,
-      webuntis_school: webuntisSchool || null,
-      webuntis_server: webuntisServer || null,
-    }).select().single();
+      platform: selectedPlatform,
+      platform_config: selectedPlatform ? platformConfig : null,
+    };
+
+    // Legacy WebUntis columns for backwards compatibility
+    if (selectedPlatform === "webuntis") {
+      insertData.webuntis_server = platformConfig.server || null;
+      insertData.webuntis_school = platformConfig.school || null;
+    }
+
+    const { data, error } = await supabase.from("children").insert(insertData).select().single();
 
     if (error) {
       toast.error("Kind konnte nicht hinzugefügt werden.");
@@ -48,7 +74,6 @@ export default function AddChildPage() {
     }
 
     toast.success(`${name} wurde hinzugefügt!`);
-    // Navigate to child detail page so user can sync or load demo data
     router.push(`/children/${data.id}`);
     router.refresh();
   }
@@ -67,8 +92,7 @@ export default function AddChildPage() {
         <CardHeader>
           <CardTitle>Kind hinzufügen</CardTitle>
           <CardDescription>
-            Gib die Daten deines Kindes ein. Die WebUntis-Verbindung ist optional
-            und kann später eingerichtet werden.
+            Gib die Daten deines Kindes ein und wähle die Schulplattform.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -105,32 +129,68 @@ export default function AddChildPage() {
               />
             </div>
 
-            <div className="rounded-lg border bg-muted/50 p-4 space-y-4">
-              <div>
-                <h3 className="text-sm font-medium">WebUntis-Verbindung</h3>
-                <p className="text-xs text-muted-foreground">
-                  Optional. Für den automatischen Stundenplan-Import.
-                </p>
+            {/* Platform Selection */}
+            <div className="space-y-3">
+              <Label>Schulplattform</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {platformList.map((platform) => (
+                  <button
+                    key={platform.id}
+                    type="button"
+                    onClick={() => handlePlatformSelect(platform.id)}
+                    className={`relative rounded-lg border p-3 text-left transition-all ${
+                      selectedPlatform === platform.id
+                        ? "border-primary bg-primary/5 ring-1 ring-primary"
+                        : "hover:border-muted-foreground/30"
+                    }`}
+                  >
+                    {selectedPlatform === platform.id && (
+                      <Check className="absolute right-2 top-2 h-4 w-4 text-primary" />
+                    )}
+                    <span className="text-sm font-medium">{platform.name}</span>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {platform.description}
+                    </p>
+                  </button>
+                ))}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="webuntis-server">WebUntis Server</Label>
-                <Input
-                  id="webuntis-server"
-                  placeholder="z.B. neilo.webuntis.com"
-                  value={webuntisServer}
-                  onChange={(e) => setWebuntisServer(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="webuntis-school">Schulkürzel</Label>
-                <Input
-                  id="webuntis-school"
-                  placeholder="z.B. gym-musterstadt"
-                  value={webuntisSchool}
-                  onChange={(e) => setWebuntisSchool(e.target.value)}
-                />
-              </div>
+              <p className="text-xs text-muted-foreground">
+                Optional. Du kannst die Plattform auch später einrichten.
+              </p>
             </div>
+
+            {/* Platform-specific fields */}
+            {selectedPlatformInfo && selectedPlatformInfo.fields.length > 0 && (
+              <div className="rounded-lg border bg-muted/50 p-4 space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium">{selectedPlatformInfo.name}-Verbindung</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Diese Daten werden für die Synchronisation benötigt.
+                  </p>
+                </div>
+                {selectedPlatformInfo.fields.map((field) => (
+                  <div key={field.key} className="space-y-2">
+                    <Label htmlFor={`platform-${field.key}`}>
+                      {field.label}
+                      {field.required && " *"}
+                    </Label>
+                    <Input
+                      id={`platform-${field.key}`}
+                      placeholder={field.placeholder}
+                      type={field.type}
+                      value={platformConfig[field.key] || ""}
+                      onChange={(e) =>
+                        handlePlatformFieldChange(field.key, e.target.value)
+                      }
+                      required={field.required}
+                    />
+                    {field.helpText && (
+                      <p className="text-xs text-muted-foreground">{field.helpText}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (

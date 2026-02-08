@@ -13,7 +13,9 @@ import { toast } from "sonner";
 import { SyncDialog } from "@/components/sync-dialog";
 import { DemoButton } from "@/components/demo-button";
 import { CalendarExport } from "@/components/calendar-export";
+import { PLATFORMS } from "@/lib/platforms/registry";
 import type { Child } from "@/lib/types";
+import type { PlatformId } from "@/lib/platforms/types";
 
 export default function ChildDetailPage() {
   const [child, setChild] = useState<Child | null>(null);
@@ -75,7 +77,13 @@ export default function ChildDetailPage() {
     );
   }
 
-  const hasWebUntis = !!(child.webuntis_server && child.webuntis_school);
+  // Determine platform – support legacy webuntis_* fields
+  const platformId: PlatformId | null =
+    (child.platform as PlatformId) ||
+    (child.webuntis_server && child.webuntis_school ? "webuntis" : null);
+
+  const platformInfo = platformId ? PLATFORMS[platformId] : null;
+  const hasPlatform = !!platformId;
 
   return (
     <div className="space-y-4">
@@ -104,13 +112,33 @@ export default function ChildDetailPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* WebUntis Connection Info */}
+          {/* Platform Connection Info */}
           <div className="rounded-lg border p-4 space-y-2">
-            <h3 className="text-sm font-medium">WebUntis-Verbindung</h3>
-            {hasWebUntis ? (
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Plattform-Verbindung</h3>
+              {platformInfo && (
+                <Badge variant="secondary" className={platformInfo.color}>
+                  {platformInfo.name}
+                </Badge>
+              )}
+            </div>
+            {hasPlatform ? (
               <div className="space-y-1 text-sm text-muted-foreground">
-                <p>Server: {child.webuntis_server}</p>
-                <p>Schule: {child.webuntis_school}</p>
+                {child.platform_config &&
+                  Object.entries(child.platform_config).map(([key, value]) =>
+                    value ? (
+                      <p key={key}>
+                        {key}: {value}
+                      </p>
+                    ) : null
+                  )}
+                {/* Legacy WebUntis info */}
+                {!child.platform_config && child.webuntis_server && (
+                  <>
+                    <p>Server: {child.webuntis_server}</p>
+                    <p>Schule: {child.webuntis_school}</p>
+                  </>
+                )}
                 {child.last_synced_at && (
                   <div className="flex items-center gap-2 pt-1">
                     <Badge variant="secondary" className="gap-1">
@@ -122,8 +150,8 @@ export default function ChildDetailPage() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Nicht konfiguriert. Du kannst Demo-Daten laden oder die
-                WebUntis-Verbindung bearbeiten.
+                Keine Plattform konfiguriert. Du kannst Demo-Daten laden oder
+                eine Plattform beim Bearbeiten auswählen.
               </p>
             )}
           </div>
@@ -133,7 +161,7 @@ export default function ChildDetailPage() {
             <SyncDialog
               childId={child.id}
               childName={child.name}
-              hasWebUntis={hasWebUntis}
+              platformId={platformId}
             />
             <DemoButton childId={child.id} />
             <CalendarExport

@@ -15,19 +15,27 @@ import {
 } from "@/components/ui/sheet";
 import { RefreshCw, Loader2, Shield } from "lucide-react";
 import { toast } from "sonner";
+import { PLATFORMS } from "@/lib/platforms/registry";
+import type { PlatformId } from "@/lib/platforms/types";
 
 interface SyncDialogProps {
   childId: string;
   childName: string;
-  hasWebUntis: boolean;
+  platformId: PlatformId | null;
 }
 
-export function SyncDialog({ childId, childName, hasWebUntis }: SyncDialogProps) {
+export function SyncDialog({ childId, childName, platformId }: SyncDialogProps) {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  if (!platformId) {
+    return null;
+  }
+
+  const platform = PLATFORMS[platformId];
 
   async function handleSync(e: React.FormEvent) {
     e.preventDefault();
@@ -64,31 +72,27 @@ export function SyncDialog({ childId, childName, hasWebUntis }: SyncDialogProps)
     setLoading(false);
   }
 
-  if (!hasWebUntis) {
-    return null;
-  }
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button className="w-full">
           <RefreshCw className="mr-2 h-4 w-4" />
-          Mit WebUntis synchronisieren
+          Mit {platform.name} synchronisieren
         </Button>
       </SheetTrigger>
       <SheetContent side="bottom" className="rounded-t-xl">
         <SheetHeader>
-          <SheetTitle>WebUntis Sync – {childName}</SheetTitle>
+          <SheetTitle>{platform.name} Sync – {childName}</SheetTitle>
           <SheetDescription>
-            Gib die WebUntis-Zugangsdaten ein, um den Stundenplan zu laden.
+            Gib deine {platform.name}-Zugangsdaten ein, um den Stundenplan zu laden.
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSync} className="mt-4 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="wu-username">Benutzername</Label>
+            <Label htmlFor="sync-username">Benutzername</Label>
             <Input
-              id="wu-username"
-              placeholder="WebUntis-Benutzername"
+              id="sync-username"
+              placeholder={`${platform.name}-Benutzername`}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -97,11 +101,11 @@ export function SyncDialog({ childId, childName, hasWebUntis }: SyncDialogProps)
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="wu-password">Passwort</Label>
+            <Label htmlFor="sync-password">Passwort</Label>
             <Input
-              id="wu-password"
+              id="sync-password"
               type="password"
-              placeholder="WebUntis-Passwort"
+              placeholder={`${platform.name}-Passwort`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

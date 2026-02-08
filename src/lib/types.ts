@@ -7,6 +7,8 @@ export interface Child {
   school_name: string;
   webuntis_school: string | null;
   webuntis_server: string | null;
+  platform: string | null;
+  platform_config: Record<string, string> | null;
   class_name: string | null;
   last_synced_at: string | null;
   created_at: string;
