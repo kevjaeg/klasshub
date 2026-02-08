@@ -2,9 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Calendar, AlertTriangle, ChevronRight, Sparkles } from "lucide-react";
+import { Plus, Calendar, AlertTriangle, ChevronRight, Sparkles, Mail, ClipboardList, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import type { Child, Lesson, Substitution } from "@/lib/types";
+import type { Child, Lesson, Substitution, Message, Homework } from "@/lib/types";
 
 const DAY_NAMES = ["", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 const SHORT_DAYS = ["", "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -151,7 +151,7 @@ export default async function DashboardPage() {
   const daysToFetch = todayDow <= 5 ? [todayDow] : [];
   if (tomorrowDow <= 5) daysToFetch.push(tomorrowDow);
 
-  const [lessonsResult, subsResult] = await Promise.all([
+  const [lessonsResult, subsResult, messagesResult, homeworkResult] = await Promise.all([
     supabase
       .from("lessons")
       .select("*")
@@ -165,10 +165,23 @@ export default async function DashboardPage() {
       .gte("date", todayDate)
       .order("date")
       .order("lesson_number"),
+    supabase
+      .from("messages")
+      .select("*")
+      .in("child_id", childIds)
+      .order("date", { ascending: false }),
+    supabase
+      .from("homework")
+      .select("*")
+      .in("child_id", childIds)
+      .eq("completed", false)
+      .order("due_date"),
   ]);
 
   const lessons = (lessonsResult.data || []) as Lesson[];
   const allSubstitutions = (subsResult.data || []) as Substitution[];
+  const allMessages = (messagesResult.data || []) as Message[];
+  const allHomework = (homeworkResult.data || []) as Homework[];
 
   return (
     <div className="space-y-6">
@@ -208,6 +221,13 @@ export default async function DashboardPage() {
         const futureSubs = allSubstitutions.filter(
           (s) => s.child_id === child.id && s.date > tomorrowDate
         );
+
+        const childMessages = allMessages
+          .filter((m) => m.child_id === child.id)
+          .slice(0, 3);
+
+        const childHomework = allHomework
+          .filter((h) => h.child_id === child.id);
 
         const todayCancelled = todaySubs.filter((s) => s.type === "cancelled").length;
         const tomorrowCancelled = tomorrowSubs.filter((s) => s.type === "cancelled").length;
@@ -336,6 +356,118 @@ export default async function DashboardPage() {
                         <span className="text-xs text-muted-foreground">
                           {childLessonsTomorrow.length} Stunden · {formatTime(childLessonsTomorrow[0].start_time)} – {formatTime(childLessonsTomorrow[childLessonsTomorrow.length - 1].end_time)}
                         </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Homework */}
+                {childHomework.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2 pt-4 px-4">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <ClipboardList className="h-3.5 w-3.5" />
+                          Hausaufgaben
+                        </CardTitle>
+                        <Link href="/homework">
+                          <Button variant="ghost" size="sm" className="text-xs h-6 px-2">
+                            Alle
+                            <ChevronRight className="ml-0.5 h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="px-4 pb-4">
+                      <div className="space-y-1.5">
+                        {childHomework.map((hw) => {
+                          const isOverdue = hw.due_date < todayDate;
+                          const isDueToday = hw.due_date === todayDate;
+                          return (
+                            <div
+                              key={hw.id}
+                              className={`flex items-center gap-3 rounded-lg border p-2.5 ${
+                                isOverdue
+                                  ? "border-red-200 bg-red-50 dark:border-red-900/30 dark:bg-red-950/20"
+                                  : isDueToday
+                                  ? "border-orange-200 bg-orange-50 dark:border-orange-900/30 dark:bg-orange-950/20"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-sm font-medium">{hw.subject}</span>
+                                  {isOverdue && (
+                                    <Badge variant="destructive" className="text-[10px] px-1.5 py-0 flex items-center gap-0.5">
+                                      <AlertCircle className="h-2.5 w-2.5" />
+                                      Überfällig
+                                    </Badge>
+                                  )}
+                                  {isDueToday && (
+                                    <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-[10px] px-1.5 py-0">
+                                      Heute fällig
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground truncate mt-0.5">
+                                  {hw.description}
+                                </p>
+                              </div>
+                              <div className="text-[10px] text-muted-foreground shrink-0">
+                                {new Date(hw.due_date + "T00:00:00").toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Messages */}
+                {childMessages.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2 pt-4 px-4">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                          <Mail className="h-3.5 w-3.5" />
+                          Nachrichten
+                        </CardTitle>
+                        <Link href="/messages">
+                          <Button variant="ghost" size="sm" className="text-xs h-6 px-2">
+                            Alle
+                            <ChevronRight className="ml-0.5 h-3 w-3" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="px-4 pb-4">
+                      <div className="space-y-1.5">
+                        {childMessages.map((msg) => (
+                          <Link key={msg.id} href="/messages" className="block">
+                            <div
+                              className={`rounded-lg border p-2.5 transition-colors hover:bg-muted/50 ${
+                                !msg.read ? "border-primary/30 bg-primary/5" : ""
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className={`text-sm truncate ${!msg.read ? "font-semibold" : "font-medium"}`}>
+                                  {msg.title}
+                                </span>
+                                {!msg.read && (
+                                  <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                                {msg.sender && <span>{msg.sender}</span>}
+                                {msg.sender && <span>·</span>}
+                                <span>
+                                  {new Date(msg.date).toLocaleDateString("de-DE", { day: "numeric", month: "short" })}
+                                </span>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>

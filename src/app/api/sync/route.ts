@@ -70,6 +70,8 @@ export async function POST(request: Request) {
     await Promise.all([
       supabase.from("lessons").delete().eq("child_id", childId),
       supabase.from("substitutions").delete().eq("child_id", childId),
+      supabase.from("messages").delete().eq("child_id", childId),
+      supabase.from("homework").delete().eq("child_id", childId),
     ]);
 
     // Insert new lessons
@@ -118,6 +120,47 @@ export async function POST(request: Request) {
       }
     }
 
+    // Insert new messages
+    if (result.messages && result.messages.length > 0) {
+      const messagesToInsert = result.messages.map((m) => ({
+        child_id: childId,
+        external_id: m.id,
+        title: m.title,
+        body: m.body,
+        sender: m.sender,
+        date: m.date,
+        read: m.read,
+      }));
+
+      const { error: insertError } = await supabase
+        .from("messages")
+        .insert(messagesToInsert);
+
+      if (insertError) {
+        console.error("Message insert error:", insertError);
+      }
+    }
+
+    // Insert new homework
+    if (result.homework && result.homework.length > 0) {
+      const homeworkToInsert = result.homework.map((h) => ({
+        child_id: childId,
+        external_id: h.id,
+        subject: h.subject,
+        description: h.description,
+        due_date: h.dueDate,
+        completed: h.completed,
+      }));
+
+      const { error: insertError } = await supabase
+        .from("homework")
+        .insert(homeworkToInsert);
+
+      if (insertError) {
+        console.error("Homework insert error:", insertError);
+      }
+    }
+
     // Update last_synced_at
     await supabase
       .from("children")
@@ -128,6 +171,8 @@ export async function POST(request: Request) {
       success: true,
       lessonsCount: result.lessons.length,
       substitutionsCount: result.substitutions.length,
+      messagesCount: result.messages?.length || 0,
+      homeworkCount: result.homework?.length || 0,
     });
   } catch (error) {
     const message =

@@ -1,4 +1,5 @@
 import type { TimetableEntry, SubstitutionEntry } from "./service";
+import type { MessageData, HomeworkData } from "@/lib/platforms/types";
 
 // Realistic German school timetable for a 7th grader
 export const DEMO_LESSONS: TimetableEntry[] = [
@@ -40,6 +41,113 @@ export const DEMO_LESSONS: TimetableEntry[] = [
   { subject: "Biologie", teacher: "Hr. Fischer", room: "NW3", dayOfWeek: 5, lessonNumber: 4, startTime: "10:35", endTime: "11:20" },
   { subject: "Englisch", teacher: "Fr. Weber", room: "B112", dayOfWeek: 5, lessonNumber: 5, startTime: "11:40", endTime: "12:25" },
 ];
+
+// Realistic school messages
+export function generateDemoMessages(): MessageData[] {
+  const today = new Date();
+
+  const twoDaysAgo = new Date(today);
+  twoDaysAgo.setDate(today.getDate() - 2);
+
+  const fiveDaysAgo = new Date(today);
+  fiveDaysAgo.setDate(today.getDate() - 5);
+
+  const oneWeekAgo = new Date(today);
+  oneWeekAgo.setDate(today.getDate() - 7);
+
+  return [
+    {
+      id: "msg-1",
+      title: "Elternbrief: Projektwoche 17.–21. März",
+      body: "Liebe Eltern,\n\nin der Woche vom 17. bis 21. März findet unsere jährliche Projektwoche statt. Die Schülerinnen und Schüler der 7. Klassen arbeiten zum Thema \"Nachhaltigkeit im Alltag\". Bitte geben Sie Ihrem Kind Materialien zum Basteln mit (Kartons, Stoffreste etc.).\n\nMit freundlichen Grüßen\nDie Schulleitung",
+      sender: "Schulleitung",
+      date: twoDaysAgo.toISOString(),
+      read: false,
+    },
+    {
+      id: "msg-2",
+      title: "Wandertag am Freitag – Packliste",
+      body: "Liebe Eltern,\n\nam kommenden Freitag findet der Wandertag der Klasse 7b statt. Treffpunkt ist um 8:00 Uhr am Haupteingang. Bitte geben Sie Ihrem Kind festes Schuhwerk, Regenjacke und ausreichend Verpflegung mit. Rückkehr gegen 14:00 Uhr.\n\nBei Rückfragen wenden Sie sich an Fr. Müller.\n\nViele Grüße\nFr. Müller",
+      sender: "Fr. Müller",
+      date: fiveDaysAgo.toISOString(),
+      read: false,
+    },
+    {
+      id: "msg-3",
+      title: "Elternsprechtag am 12. März",
+      body: "Sehr geehrte Eltern,\n\nder nächste Elternsprechtag findet am 12. März von 15:00 bis 19:00 Uhr statt. Bitte melden Sie sich über das Online-Buchungstool an. Die Terminvergabe ist ab sofort freigeschaltet.\n\nMit freundlichen Grüßen\nDas Sekretariat",
+      sender: "Sekretariat",
+      date: oneWeekAgo.toISOString(),
+      read: true,
+    },
+    {
+      id: "msg-4",
+      title: "Neue AGs im 2. Halbjahr",
+      body: "Liebe Schülerinnen und Schüler,\n\nim 2. Halbjahr bieten wir folgende neue AGs an:\n- Robotik (Mi, 14:00–15:30)\n- Schulgarten (Do, 14:00–15:00)\n- Theater (Fr, 14:00–16:00)\n\nAnmeldung bis Ende der Woche bei Herrn Neumann.\n\nViele Grüße\nHr. Neumann",
+      sender: "Hr. Neumann",
+      date: oneWeekAgo.toISOString(),
+      read: true,
+    },
+  ];
+}
+
+// Realistic homework assignments
+export function generateDemoHomework(): HomeworkData[] {
+  const today = new Date();
+
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const inTwoDays = new Date(today);
+  inTwoDays.setDate(today.getDate() + 2);
+
+  const inFourDays = new Date(today);
+  inFourDays.setDate(today.getDate() + 4);
+
+  const nextWeek = new Date(today);
+  nextWeek.setDate(today.getDate() + 7);
+
+  return [
+    {
+      id: "hw-1",
+      subject: "Mathematik",
+      description: "S. 142, Aufgaben 3a–d (Gleichungen lösen)",
+      dueDate: yesterday.toISOString().split("T")[0],
+      completed: false,
+    },
+    {
+      id: "hw-2",
+      subject: "Deutsch",
+      description: "Aufsatz: \"Mein Lieblingsbuch\" (mind. 250 Wörter)",
+      dueDate: tomorrow.toISOString().split("T")[0],
+      completed: false,
+    },
+    {
+      id: "hw-3",
+      subject: "Englisch",
+      description: "Workbook p. 67, Ex. 1–3 (Past Simple)",
+      dueDate: inTwoDays.toISOString().split("T")[0],
+      completed: false,
+    },
+    {
+      id: "hw-4",
+      subject: "Biologie",
+      description: "Arbeitsblatt Fotosynthese ausfüllen",
+      dueDate: inFourDays.toISOString().split("T")[0],
+      completed: true,
+    },
+    {
+      id: "hw-5",
+      subject: "Geschichte",
+      description: "Referat vorbereiten: Industrielle Revolution (5 Min.)",
+      dueDate: nextWeek.toISOString().split("T")[0],
+      completed: false,
+    },
+  ];
+}
 
 // Generate dynamic substitutions based on the current date
 export function generateDemoSubstitutions(): SubstitutionEntry[] {

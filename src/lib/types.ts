@@ -41,3 +41,26 @@ export interface Substitution {
   info_text: string | null;
   synced_at: string;
 }
+
+export interface Message {
+  id: string;
+  child_id: string;
+  external_id: string | null;
+  title: string;
+  body: string;
+  sender: string | null;
+  date: string;
+  read: boolean;
+  synced_at: string;
+}
+
+export interface Homework {
+  id: string;
+  child_id: string;
+  external_id: string | null;
+  subject: string;
+  description: string;
+  due_date: string;
+  completed: boolean;
+  synced_at: string;
+}
