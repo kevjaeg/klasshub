@@ -1,0 +1,49 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { generateICalFeed } from "@/lib/calendar/ical";
+import type { Lesson, Substitution } from "@/lib/types";
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ childId: string }> }
+) {
+  const { childId } = await params;
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
+  }
+
+  // Fetch child
+  const { data: child } = await supabase
+    .from("children")
+    .select("*")
+    .eq("id", childId)
+    .single();
+
+  if (!child) {
+    return NextResponse.json({ error: "Kind nicht gefunden" }, { status: 404 });
+  }
+
+  // Fetch lessons and substitutions
+  const [lessonsRes, subsRes] = await Promise.all([
+    supabase.from("lessons").select("*").eq("child_id", childId),
+    supabase.from("substitutions").select("*").eq("child_id", childId),
+  ]);
+
+  const lessons = (lessonsRes.data || []) as Lesson[];
+  const substitutions = (subsRes.data || []) as Substitution[];
+
+  const ical = generateICalFeed(child.name, lessons, substitutions);
+
+  return new NextResponse(ical, {
+    headers: {
+      "Content-Type": "text/calendar; charset=utf-8",
+      "Content-Disposition": `attachment; filename="${child.name}-stundenplan.ics"`,
+    },
+  });
+}
