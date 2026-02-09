@@ -72,3 +72,35 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+// Handle notification show requests from the client
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SHOW_NOTIFICATION") {
+    const { title, options } = event.data;
+    self.registration.showNotification(title, options);
+  }
+});
+
+// Handle notification clicks – open the app on the relevant page
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification.data?.url || "/dashboard";
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        // Focus existing window if available
+        for (const client of clientList) {
+          if ("focus" in client) {
+            client.focus();
+            client.navigate(url);
+            return;
+          }
+        }
+        // Otherwise open new window
+        return self.clients.openWindow(url);
+      })
+  );
+});

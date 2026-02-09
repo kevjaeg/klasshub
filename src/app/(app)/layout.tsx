@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app-shell";
 import { InstallPrompt } from "@/components/install-prompt";
+import { NotificationPrompt } from "@/components/notification-prompt";
 
 export default async function AppLayout({
   children,
@@ -21,6 +22,7 @@ export default async function AppLayout({
     <AppShell userName={name} userEmail={user.email || ""}>
       {children}
       <InstallPrompt />
+      <NotificationPrompt />
     </AppShell>
   );
 }

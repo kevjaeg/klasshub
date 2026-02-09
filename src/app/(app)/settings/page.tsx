@@ -1,18 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { LogOut, Trash2, Shield } from "lucide-react";
+import { LogOut, Trash2, Shield, Palette, Sun, Moon, Monitor, Bell, BellOff } from "lucide-react";
 import { toast } from "sonner";
+import {
+  getNotificationSettings,
+  saveNotificationSettings,
+  requestPermission,
+  type NotificationSettings,
+} from "@/lib/notifications";
 
 export default function SettingsPage() {
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+  const { theme, setTheme } = useTheme();
+
+  // Notification state
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>("default");
+  const [notifSettings, setNotifSettings] = useState<NotificationSettings>({
+    substitutions: true,
+    messages: true,
+    homework: true,
+  });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if ("Notification" in window) {
+      setNotifPermission(Notification.permission);
+    }
+    setNotifSettings(getNotificationSettings());
+  }, []);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -30,22 +55,135 @@ export default function SettingsPage() {
 
     setDeleting(true);
 
-    // Delete all children (cascades to lessons + substitutions via DB)
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase.from("children").delete().eq("user_id", user.id);
     }
 
-    // Sign out
     await supabase.auth.signOut();
     toast.success("Dein Konto und alle Daten wurden gelöscht.");
     router.push("/");
     router.refresh();
   }
 
+  async function handleEnableNotifications() {
+    const result = await requestPermission();
+    setNotifPermission(result);
+    if (result === "granted") {
+      toast.success("Benachrichtigungen aktiviert!");
+    } else if (result === "denied") {
+      toast.error("Benachrichtigungen wurden blockiert. Ändere dies in den Browser-Einstellungen.");
+    }
+  }
+
+  function handleNotifToggle(key: keyof NotificationSettings) {
+    const updated = { ...notifSettings, [key]: !notifSettings[key] };
+    setNotifSettings(updated);
+    saveNotificationSettings(updated);
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Einstellungen</h1>
+
+      {/* Dark Mode Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            Darstellung
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            {mounted && (
+              <>
+                <Button
+                  variant={theme === "light" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setTheme("light")}
+                >
+                  <Sun className="mr-2 h-4 w-4" />
+                  Hell
+                </Button>
+                <Button
+                  variant={theme === "dark" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setTheme("dark")}
+                >
+                  <Moon className="mr-2 h-4 w-4" />
+                  Dunkel
+                </Button>
+                <Button
+                  variant={theme === "system" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setTheme("system")}
+                >
+                  <Monitor className="mr-2 h-4 w-4" />
+                  System
+                </Button>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Notification Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
+            Benachrichtigungen
+          </CardTitle>
+          <CardDescription>
+            {notifPermission === "granted" && "Benachrichtigungen sind aktiv."}
+            {notifPermission === "denied" && "Benachrichtigungen wurden im Browser blockiert."}
+            {notifPermission === "default" && "Benachrichtigungen sind noch nicht aktiviert."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {notifPermission !== "granted" ? (
+            <Button
+              className="w-full"
+              onClick={handleEnableNotifications}
+              disabled={notifPermission === "denied"}
+            >
+              {notifPermission === "denied" ? (
+                <>
+                  <BellOff className="mr-2 h-4 w-4" />
+                  Im Browser blockiert
+                </>
+              ) : (
+                <>
+                  <Bell className="mr-2 h-4 w-4" />
+                  Benachrichtigungen aktivieren
+                </>
+              )}
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Nach dem Sync wirst du benachrichtigt bei:
+              </p>
+              {([
+                { key: "substitutions" as const, label: "Vertretungen" },
+                { key: "messages" as const, label: "Nachrichten" },
+                { key: "homework" as const, label: "Hausaufgaben" },
+              ]).map(({ key, label }) => (
+                <label key={key} className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notifSettings[key]}
+                    onChange={() => handleNotifToggle(key)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span className="text-sm">{label}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
