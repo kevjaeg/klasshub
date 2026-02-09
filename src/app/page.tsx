@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Shield, Smartphone, Zap, Clock, Users, ArrowRight } from "lucide-react";
+import { ScreenshotCarousel } from "@/components/screenshot-carousel";
 
 export default function LandingPage() {
   return (
@@ -27,31 +28,38 @@ export default function LandingPage() {
 
       {/* Hero */}
       <main className="flex-1">
-        <section className="flex flex-col items-center justify-center px-4 py-20 text-center">
-          <div className="mx-auto max-w-lg space-y-6">
-            <div className="mx-auto inline-flex items-center gap-2 rounded-full border bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
-              Kostenlos in der Beta
+        <section className="px-4 py-16 sm:py-20">
+          <div className="mx-auto flex max-w-[800px] flex-col items-center gap-10 lg:flex-row lg:items-center lg:gap-12">
+            {/* Text */}
+            <div className="flex-1 space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
+                Kostenlos in der Beta
+              </div>
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+                Alle Schul-Apps.{" "}
+                <span className="text-primary">Ein Dashboard.</span>
+              </h1>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Stundenplan, Vertretungen und Ausfälle deiner Kinder – zentral an einem Ort.
+                Nie wieder zwischen fünf Apps wechseln.
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
+                <Link href="/register">
+                  <Button size="lg" className="w-full sm:w-auto gap-2">
+                    Kostenlos starten
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Keine Kreditkarte nötig. DSGVO-konform. Daten in der EU.
+              </p>
             </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Alle Schul-Apps.{" "}
-              <span className="text-primary">Ein Dashboard.</span>
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Stundenplan, Vertretungen und Ausfälle deiner Kinder – zentral an einem Ort.
-              Nie wieder zwischen fünf Apps wechseln.
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link href="/register">
-                <Button size="lg" className="w-full sm:w-auto gap-2">
-                  Kostenlos starten
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+            {/* Screenshot Carousel */}
+            <div className="w-full lg:w-auto">
+              <ScreenshotCarousel />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Keine Kreditkarte nötig. DSGVO-konform. Daten in der EU.
-            </p>
           </div>
         </section>
 
