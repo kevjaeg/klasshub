@@ -116,6 +116,13 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+            <p className="text-sm text-muted-foreground">
+              Deine Schule nutzt eine andere App?{" "}
+              <a href="mailto:kontakt@schoolhub.app" className="text-primary hover:underline">
+                Schreib uns
+              </a>{" "}
+              – wir bauen sie ein!
+            </p>
           </div>
         </section>
 
