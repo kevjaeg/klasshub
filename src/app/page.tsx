@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Shield, Smartphone, Zap, Clock, Users, ArrowRight, Check } from "lucide-react";
+import { GraduationCap, Shield, Smartphone, Zap, Clock, Users, ArrowRight, Check, Quote } from "lucide-react";
 import { ScreenshotCarousel } from "@/components/screenshot-carousel";
 
 export default function LandingPage() {
@@ -177,6 +177,34 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section className="px-4 py-16">
+          <div className="mx-auto max-w-2xl space-y-8">
+            <h2 className="text-center text-2xl font-bold">Was Eltern sagen</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {[
+                { quote: "Endlich kann ich alles auf einen Blick sehen statt in 4 Apps rumzuklicken.", name: "Sarah M.", detail: "Mutter von 2 Kindern" },
+                { quote: "Die Vertretungsplan-Benachrichtigungen haben mir schon mehrmals den Morgen gerettet.", name: "Thomas K.", detail: "Vater, München" },
+                { quote: "Hätte ich das vor einem Jahr gehabt... so viel Stress hätte ich mir sparen können.", name: "Lisa B.", detail: "Mutter von 3 Kindern" },
+              ].map((t) => (
+                <div key={t.name} className="rounded-xl border bg-background p-5 shadow-sm space-y-3">
+                  <Quote className="h-5 w-5 text-primary/30" />
+                  <p className="text-sm leading-relaxed">{t.quote}</p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      {t.name[0]}
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium">{t.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{t.detail}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
