@@ -84,7 +84,7 @@ export default function LandingPage() {
                 SchoolHub verbindet sich mit den gängigsten Schulplattformen.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { name: "WebUntis", status: "live" as const, color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" },
                 { name: "Schulmanager", status: "soon" as const, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
