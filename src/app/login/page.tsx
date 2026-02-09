@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Loader2 } from "lucide-react";
+import { ForceLightMode } from "@/components/force-light-mode";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -44,6 +45,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-muted/40 px-4">
+      <ForceLightMode />
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
