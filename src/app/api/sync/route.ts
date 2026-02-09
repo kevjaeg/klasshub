@@ -66,6 +66,13 @@ export async function POST(request: Request) {
     // Fetch data – credentials are ONLY used here and discarded after
     const result = await adapter.sync(platformConfig, { username, password });
 
+    // Count old data BEFORE deleting (for notification diff)
+    const [oldSubs, oldMsgs, oldHw] = await Promise.all([
+      supabase.from("substitutions").select("id", { count: "exact", head: true }).eq("child_id", childId),
+      supabase.from("messages").select("id", { count: "exact", head: true }).eq("child_id", childId),
+      supabase.from("homework").select("id", { count: "exact", head: true }).eq("child_id", childId),
+    ]);
+
     // Delete old data for this child
     await Promise.all([
       supabase.from("lessons").delete().eq("child_id", childId),
@@ -167,12 +174,19 @@ export async function POST(request: Request) {
       .update({ last_synced_at: new Date().toISOString() })
       .eq("id", childId);
 
+    const newSubstitutions = result.substitutions.length;
+    const newMessages = result.messages?.length || 0;
+    const newHomework = result.homework?.length || 0;
+
     return NextResponse.json({
       success: true,
       lessonsCount: result.lessons.length,
-      substitutionsCount: result.substitutions.length,
-      messagesCount: result.messages?.length || 0,
-      homeworkCount: result.homework?.length || 0,
+      substitutionsCount: newSubstitutions,
+      messagesCount: newMessages,
+      homeworkCount: newHomework,
+      oldSubstitutionsCount: oldSubs.count || 0,
+      oldMessagesCount: oldMsgs.count || 0,
+      oldHomeworkCount: oldHw.count || 0,
     });
   } catch (error) {
     const message =

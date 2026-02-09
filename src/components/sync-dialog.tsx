@@ -17,6 +17,7 @@ import { RefreshCw, Loader2, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { PLATFORMS } from "@/lib/platforms/registry";
 import type { PlatformId } from "@/lib/platforms/types";
+import { sendSyncNotifications } from "@/lib/notifications";
 
 interface SyncDialogProps {
   childId: string;
@@ -58,6 +59,21 @@ export function SyncDialog({ childId, childName, platformId }: SyncDialogProps) 
 
       toast.success(
         `Sync erfolgreich! ${data.lessonsCount} Stunden und ${data.substitutionsCount} Vertretungen geladen.`
+      );
+
+      // Send browser notification if there are new items
+      sendSyncNotifications(
+        {
+          substitutions: data.oldSubstitutionsCount || 0,
+          messages: data.oldMessagesCount || 0,
+          homework: data.oldHomeworkCount || 0,
+        },
+        {
+          substitutions: data.substitutionsCount || 0,
+          messages: data.messagesCount || 0,
+          homework: data.homeworkCount || 0,
+        },
+        childName
       );
 
       // Clear credentials from state immediately
