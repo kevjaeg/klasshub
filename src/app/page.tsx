@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Shield, Smartphone, Zap, Clock, Users, ArrowRight, Check, Quote } from "lucide-react";
 import { ScreenshotCarousel } from "@/components/screenshot-carousel";
+import { StickyCTABar } from "@/components/sticky-cta-bar";
 
 export default function LandingPage() {
   return (
@@ -46,14 +47,14 @@ export default function LandingPage() {
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <Link href="/register">
-                  <Button size="lg" className="w-full sm:w-auto gap-2">
-                    Kostenlos starten
+                  <Button size="lg" className="w-full sm:w-auto gap-2 text-base">
+                    Jetzt kostenlos starten
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
               <p className="text-xs text-muted-foreground">
-                Keine Kreditkarte nötig. DSGVO-konform. Daten in der EU.
+                Einrichtung in unter 2 Minuten &middot; Keine Kreditkarte nötig
               </p>
             </div>
             {/* Screenshot Carousel */}
@@ -210,22 +211,23 @@ export default function LandingPage() {
         </section>
 
         {/* CTA */}
-        <section className="border-t bg-muted/30 px-4 py-16">
+        <section className="border-t bg-primary px-4 py-16 text-primary-foreground">
           <div className="mx-auto max-w-lg text-center space-y-4">
-            <h2 className="text-2xl font-bold">Bereit?</h2>
-            <p className="text-muted-foreground">
-              Erstelle dein Konto in 30 Sekunden. Füge dein Kind hinzu.
-              Lade den Stundenplan – fertig.
-            </p>
+            <h2 className="text-2xl font-bold">Bereit für weniger Stress?</h2>
             <Link href="/register">
-              <Button size="lg" className="gap-2">
-                Jetzt kostenlos starten
+              <Button size="lg" variant="secondary" className="gap-2 text-base font-semibold">
+                Jetzt Beta-Zugang sichern
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
+            <p className="text-xs text-primary-foreground/60">
+              Noch 47 Plätze verfügbar
+            </p>
           </div>
         </section>
       </main>
+
+      <StickyCTABar />
 
       {/* Footer */}
       <footer className="border-t px-4 py-6">
