@@ -2,8 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Calendar, AlertTriangle, ChevronRight, Sparkles, Mail, ClipboardList, AlertCircle } from "lucide-react";
+import { Plus, Calendar, AlertTriangle, ChevronRight, Sparkles, Mail, ClipboardList, AlertCircle, Clock } from "lucide-react";
 import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+import { de } from "date-fns/locale";
+import { DemoButton } from "@/components/demo-button";
 import type { Child, Lesson, Substitution, Message, Homework } from "@/lib/types";
 
 const DAY_NAMES = ["", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
@@ -243,10 +246,18 @@ export default async function DashboardPage() {
                   {child.name[0].toUpperCase()}
                 </div>
                 <div>
-                  <span className="font-semibold text-sm">{child.name}</span>
-                  <span className="text-xs text-muted-foreground ml-2">
-                    {child.class_name || child.school_name}
-                  </span>
+                  <div>
+                    <span className="font-semibold text-sm">{child.name}</span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      {child.class_name || child.school_name}
+                    </span>
+                  </div>
+                  {child.last_synced_at && (
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      Aktualisiert {formatDistanceToNow(new Date(child.last_synced_at), { addSuffix: true, locale: de })}
+                    </div>
+                  )}
                 </div>
               </div>
               <Link href={`/children/${child.id}`}>
@@ -260,16 +271,24 @@ export default async function DashboardPage() {
             {/* Not synced state */}
             {notSynced ? (
               <Card>
-                <CardContent className="py-8 text-center">
-                  <Calendar className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Noch keine Daten. Lade Demo-Daten oder verbinde WebUntis.
-                  </p>
-                  <Link href={`/children/${child.id}`}>
-                    <Button size="sm" variant="outline">
-                      Jetzt einrichten
-                    </Button>
-                  </Link>
+                <CardContent className="py-8 text-center flex flex-col items-center gap-3">
+                  <div className="rounded-full bg-muted p-4">
+                    <Calendar className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold">Noch nicht synchronisiert</p>
+                    <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                      Verbinde die Schulplattform oder lade Demo-Daten zum Ausprobieren.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/children/${child.id}`}>
+                      <Button size="sm" variant="outline">
+                        Einrichten
+                      </Button>
+                    </Link>
+                    <DemoButton childId={child.id} />
+                  </div>
                 </CardContent>
               </Card>
             ) : (

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Trash2, Clock, School, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Trash2, Clock, School, Loader2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { SyncDialog } from "@/components/sync-dialog";
@@ -21,6 +22,11 @@ export default function ChildDetailPage() {
   const [child, setChild] = useState<Child | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editSchoolName, setEditSchoolName] = useState("");
+  const [editClassName, setEditClassName] = useState("");
+  const [saving, setSaving] = useState(false);
   const router = useRouter();
   const params = useParams();
   const supabase = createClient();
@@ -61,6 +67,42 @@ export default function ChildDetailPage() {
     router.refresh();
   }
 
+  function startEditing() {
+    if (!child) return;
+    setEditName(child.name);
+    setEditSchoolName(child.school_name);
+    setEditClassName(child.class_name || "");
+    setEditing(true);
+  }
+
+  async function handleSave() {
+    if (!editName.trim() || !editSchoolName.trim()) {
+      toast.error("Name und Schule sind Pflichtfelder.");
+      return;
+    }
+
+    setSaving(true);
+    const { error } = await supabase
+      .from("children")
+      .update({
+        name: editName.trim(),
+        school_name: editSchoolName.trim(),
+        class_name: editClassName.trim() || null,
+      })
+      .eq("id", childId);
+
+    if (error) {
+      toast.error("Speichern fehlgeschlagen.");
+      setSaving(false);
+      return;
+    }
+
+    await fetchChild();
+    toast.success("Änderungen gespeichert.");
+    setEditing(false);
+    setSaving(false);
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -98,17 +140,51 @@ export default function ChildDetailPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary text-xl font-semibold">
-              {child.name[0].toUpperCase()}
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary text-xl font-semibold shrink-0">
+              {(editing ? editName : child.name)[0]?.toUpperCase() || "?"}
             </div>
-            <div>
-              <CardTitle>{child.name}</CardTitle>
-              <CardDescription className="flex items-center gap-1">
-                <School className="h-3 w-3" />
-                {child.school_name}
-                {child.class_name && ` · ${child.class_name}`}
-              </CardDescription>
-            </div>
+            {editing ? (
+              <div className="flex-1 space-y-2">
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Name *"
+                />
+                <Input
+                  value={editSchoolName}
+                  onChange={(e) => setEditSchoolName(e.target.value)}
+                  placeholder="Schule *"
+                />
+                <Input
+                  value={editClassName}
+                  onChange={(e) => setEditClassName(e.target.value)}
+                  placeholder="Klasse"
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleSave} disabled={saving}>
+                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Speichern
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={saving}>
+                    Abbrechen
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1">
+                <CardTitle>{child.name}</CardTitle>
+                <CardDescription className="flex items-center gap-1">
+                  <School className="h-3 w-3" />
+                  {child.school_name}
+                  {child.class_name && ` · ${child.class_name}`}
+                </CardDescription>
+              </div>
+            )}
+            {!editing && (
+              <Button variant="ghost" size="icon" className="shrink-0" onClick={startEditing}>
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
