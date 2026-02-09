@@ -3,10 +3,13 @@ import { Button } from "@/components/ui/button";
 import { GraduationCap, Shield, Smartphone, Zap, Clock, Users, ArrowRight, Check, Quote } from "lucide-react";
 import { ScreenshotCarousel } from "@/components/screenshot-carousel";
 import { StickyCTABar } from "@/components/sticky-cta-bar";
+import { TrackedLink } from "@/components/tracked-link";
+import { ForceLightMode } from "@/components/force-light-mode";
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-dvh flex-col">
+      <ForceLightMode />
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
@@ -46,12 +49,12 @@ export default function LandingPage() {
                 Nie wieder zwischen fünf Apps wechseln.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
-                <Link href="/register">
+                <TrackedLink href="/register" event="cta_click" props={{ location: "hero" }}>
                   <Button size="lg" className="w-full sm:w-auto gap-2 text-base">
                     Jetzt kostenlos starten
                     <ArrowRight className="h-4 w-4" />
                   </Button>
-                </Link>
+                </TrackedLink>
               </div>
               <p className="text-xs text-muted-foreground">
                 Einrichtung in unter 2 Minuten &middot; Keine Kreditkarte nötig
@@ -214,12 +217,12 @@ export default function LandingPage() {
         <section className="border-t bg-primary px-4 py-16 text-primary-foreground">
           <div className="mx-auto max-w-lg text-center space-y-4">
             <h2 className="text-2xl font-bold">Bereit für weniger Stress?</h2>
-            <Link href="/register">
+            <TrackedLink href="/register" event="cta_click" props={{ location: "footer_cta" }}>
               <Button size="lg" variant="secondary" className="gap-2 text-base font-semibold">
                 Jetzt Beta-Zugang sichern
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </Link>
+            </TrackedLink>
             <p className="text-xs text-primary-foreground/60">
               Noch 47 Plätze verfügbar
             </p>
