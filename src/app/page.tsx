@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Shield, Smartphone, Zap, Clock, Users, ArrowRight } from "lucide-react";
+import { GraduationCap, Shield, Smartphone, Zap, Clock, Users, ArrowRight, Check } from "lucide-react";
 import { ScreenshotCarousel } from "@/components/screenshot-carousel";
 
 export default function LandingPage() {
@@ -75,8 +75,52 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Features */}
+        {/* Supported Platforms */}
         <section className="px-4 py-16">
+          <div className="mx-auto max-w-2xl space-y-8">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold">Unterstützte Plattformen</h2>
+              <p className="text-muted-foreground">
+                SchoolHub verbindet sich mit den gängigsten Schulplattformen.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {[
+                { name: "WebUntis", status: "live" as const, color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" },
+                { name: "Schulmanager", status: "soon" as const, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+                { name: "IServ", status: "soon" as const, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+                { name: "Moodle", status: "soon" as const, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" },
+                { name: "Sdui", status: "soon" as const, color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" },
+                { name: "DieSchulApp", status: "soon" as const, color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400" },
+              ].map((platform) => (
+                <div
+                  key={platform.name}
+                  className={`relative flex flex-col items-center gap-2 rounded-xl border p-5 text-center ${
+                    platform.status === "live" ? "" : "opacity-60"
+                  }`}
+                >
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${platform.color}`}>
+                    {platform.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium">{platform.name}</span>
+                  {platform.status === "live" ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      <Check className="h-2.5 w-2.5" />
+                      Verfügbar
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      Coming Soon
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section className="border-t bg-muted/30 px-4 py-16">
           <div className="mx-auto max-w-2xl">
             <h2 className="mb-8 text-center text-2xl font-bold">Was SchoolHub kann</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
