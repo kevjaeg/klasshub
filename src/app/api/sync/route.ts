@@ -81,6 +81,9 @@ export async function POST(request: Request) {
       supabase.from("homework").delete().eq("child_id", childId),
     ]);
 
+    // Track partial failures
+    const errors: { category: string; message: string }[] = [];
+
     // Insert new lessons
     if (result.lessons.length > 0) {
       const lessonsToInsert = result.lessons.map((l) => ({
@@ -100,6 +103,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Lesson insert error:", insertError);
+        errors.push({ category: "Stunden", message: insertError.message });
       }
     }
 
@@ -124,6 +128,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Substitution insert error:", insertError);
+        errors.push({ category: "Vertretungen", message: insertError.message });
       }
     }
 
@@ -145,6 +150,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Message insert error:", insertError);
+        errors.push({ category: "Nachrichten", message: insertError.message });
       }
     }
 
@@ -165,6 +171,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Homework insert error:", insertError);
+        errors.push({ category: "Hausaufgaben", message: insertError.message });
       }
     }
 
@@ -179,7 +186,8 @@ export async function POST(request: Request) {
     const newHomework = result.homework?.length || 0;
 
     return NextResponse.json({
-      success: true,
+      success: errors.length === 0,
+      partialSuccess: errors.length > 0,
       lessonsCount: result.lessons.length,
       substitutionsCount: newSubstitutions,
       messagesCount: newMessages,
@@ -187,6 +195,7 @@ export async function POST(request: Request) {
       oldSubstitutionsCount: oldSubs.count || 0,
       oldMessagesCount: oldMsgs.count || 0,
       oldHomeworkCount: oldHw.count || 0,
+      errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
     const message =
