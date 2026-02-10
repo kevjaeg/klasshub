@@ -279,6 +279,16 @@ export async function POST(request: Request) {
     const newMessages = result.messages?.length || 0;
     const newHomework = result.homework?.length || 0;
 
+    // Warn if no lessons returned on a weekday
+    let warning: string | null = null;
+    if (result.lessons.length === 0) {
+      const dayOfWeek = new Date().getDay();
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        console.warn(`No lessons returned from sync for child ${childId}`);
+        warning = "Keine Stunden gefunden – ist heute schulfrei?";
+      }
+    }
+
     return NextResponse.json({
       success: errors.length === 0,
       partialSuccess: errors.length > 0,
@@ -289,6 +299,7 @@ export async function POST(request: Request) {
       oldSubstitutionsCount: oldSubIds.length,
       oldMessagesCount: oldMsgIds.length,
       oldHomeworkCount: oldHwIds.length,
+      warning,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {

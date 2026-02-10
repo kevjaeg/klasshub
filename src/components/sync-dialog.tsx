@@ -77,6 +77,10 @@ export function SyncDialog({ childId, childName, platformId }: SyncDialogProps) 
         );
       }
 
+      if (data.warning) {
+        toast.warning(data.warning, { duration: 5000 });
+      }
+
       // Ask for notification permission after first successful sync
       if (typeof Notification !== "undefined" && Notification.permission === "default") {
         const permission = await requestPermission();
