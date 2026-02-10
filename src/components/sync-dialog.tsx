@@ -57,9 +57,25 @@ export function SyncDialog({ childId, childName, platformId }: SyncDialogProps) 
         return;
       }
 
-      toast.success(
-        `Sync erfolgreich! ${data.lessonsCount} Stunden und ${data.substitutionsCount} Vertretungen geladen.`
-      );
+      if (data.partialSuccess && data.errors?.length > 0) {
+        const failed = data.errors.map((e: { category: string }) => e.category).join(", ");
+        toast.warning(
+          `Sync teilweise erfolgreich. Fehlgeschlagen: ${failed}. Versuche es erneut.`,
+          { duration: 6000 }
+        );
+      } else {
+        const parts: string[] = [];
+        if (data.lessonsCount > 0) parts.push(`${data.lessonsCount} Stunden`);
+        if (data.substitutionsCount > 0) parts.push(`${data.substitutionsCount} Vertretungen`);
+        if (data.messagesCount > 0) parts.push(`${data.messagesCount} Nachrichten`);
+        if (data.homeworkCount > 0) parts.push(`${data.homeworkCount} Hausaufgaben`);
+
+        toast.success(
+          parts.length > 0
+            ? `Sync erfolgreich! ${parts.join(", ")} geladen.`
+            : "Sync erfolgreich! Keine neuen Daten gefunden."
+        );
+      }
 
       // Send browser notification if there are new items
       sendSyncNotifications(

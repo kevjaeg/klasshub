@@ -4,6 +4,8 @@ import {
   Serwist,
   NetworkFirst,
   CacheFirst,
+  StaleWhileRevalidate,
+  BackgroundSyncPlugin,
   ExpirationPlugin,
 } from "serwist";
 
@@ -21,18 +23,50 @@ const serwist = new Serwist({
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: [
-    // Supabase API calls – NetworkFirst with 5s timeout, fallback to cache
+    // Supabase GET queries – StaleWhileRevalidate: show cache instantly, update in background
     {
-      matcher: ({ url }) => url.pathname.startsWith("/rest/v1/"),
-      handler: new NetworkFirst({
+      matcher: ({ url, request }) =>
+        url.pathname.startsWith("/rest/v1/") && request.method === "GET",
+      handler: new StaleWhileRevalidate({
         cacheName: "supabase-api",
-        networkTimeoutSeconds: 5,
         plugins: [
           new ExpirationPlugin({
             maxEntries: 64,
             maxAgeSeconds: 24 * 60 * 60, // 24 hours
           }),
         ],
+      }),
+    },
+    // Supabase mutations (POST/PATCH/DELETE) – NetworkFirst, no caching needed
+    {
+      matcher: ({ url, request }) =>
+        url.pathname.startsWith("/rest/v1/") && request.method !== "GET",
+      handler: new NetworkFirst({
+        cacheName: "supabase-mutations",
+        networkTimeoutSeconds: 10,
+      }),
+    },
+    // API mutations (homework toggle, etc.) – NetworkFirst with background sync for offline
+    {
+      matcher: ({ url, request }) =>
+        url.pathname.startsWith("/api/") &&
+        request.method === "POST" &&
+        !url.pathname.startsWith("/api/sync"),
+      handler: new NetworkFirst({
+        cacheName: "api-mutations",
+        plugins: [
+          new BackgroundSyncPlugin("offline-mutations", {
+            maxRetentionTime: 60 * 24, // retry for up to 24 hours (in minutes)
+          }),
+        ],
+      }),
+    },
+    // Sync API – NetworkFirst, no background sync (requires fresh credentials)
+    {
+      matcher: ({ url }) => url.pathname.startsWith("/api/sync"),
+      handler: new NetworkFirst({
+        cacheName: "api-sync",
+        networkTimeoutSeconds: 30,
       }),
     },
     // Static assets (fonts, icons) – CacheFirst with 30 days
@@ -51,11 +85,17 @@ const serwist = new Serwist({
         ],
       }),
     },
-    // Page navigation – NetworkFirst
+    // Page navigation – StaleWhileRevalidate: instant load, background update
     {
       matcher: ({ request }) => request.mode === "navigate",
-      handler: new NetworkFirst({
+      handler: new StaleWhileRevalidate({
         cacheName: "pages",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 32,
+            maxAgeSeconds: 24 * 60 * 60,
+          }),
+        ],
       }),
     },
     // Keep remaining default cache rules
