@@ -89,14 +89,19 @@ export async function POST(request: Request) {
       body.password = "\0".repeat(body.password.length);
     }
 
-    // Count old data BEFORE deleting (for notification diff)
-    // Also preserve user notes from homework (keyed by external_id)
-    const [oldSubs, oldMsgs, oldHw, existingHomework] = await Promise.all([
-      supabase.from("substitutions").select("id", { count: "exact", head: true }).eq("child_id", childId),
-      supabase.from("messages").select("id", { count: "exact", head: true }).eq("child_id", childId),
-      supabase.from("homework").select("id", { count: "exact", head: true }).eq("child_id", childId),
+    // ── Phase 1: Snapshot old data IDs + preserve user edits ──
+    const [oldLessons, oldSubs, oldMsgs, oldHw, existingHomework] = await Promise.all([
+      supabase.from("lessons").select("id").eq("child_id", childId),
+      supabase.from("substitutions").select("id").eq("child_id", childId),
+      supabase.from("messages").select("id").eq("child_id", childId),
+      supabase.from("homework").select("id").eq("child_id", childId),
       supabase.from("homework").select("external_id, notes, completed").eq("child_id", childId),
     ]);
+
+    const oldLessonIds = (oldLessons.data || []).map((r) => r.id);
+    const oldSubIds = (oldSubs.data || []).map((r) => r.id);
+    const oldMsgIds = (oldMsgs.data || []).map((r) => r.id);
+    const oldHwIds = (oldHw.data || []).map((r) => r.id);
 
     // Build lookup for preserving user-set notes and completed status
     const hwNotesMap = new Map<string, { notes: string | null; completed: boolean }>();
@@ -106,16 +111,11 @@ export async function POST(request: Request) {
       }
     }
 
-    // Delete old data for this child
-    await Promise.all([
-      supabase.from("lessons").delete().eq("child_id", childId),
-      supabase.from("substitutions").delete().eq("child_id", childId),
-      supabase.from("messages").delete().eq("child_id", childId),
-      supabase.from("homework").delete().eq("child_id", childId),
-    ]);
-
-    // Track partial failures
+    // ── Phase 2: Insert new data FIRST (old data still intact as safety net) ──
     const errors: { category: string; message: string }[] = [];
+    const newInsertedIds: { lessons: string[]; substitutions: string[]; messages: string[]; homework: string[] } = {
+      lessons: [], substitutions: [], messages: [], homework: [],
+    };
 
     // Insert new lessons
     if (result.lessons.length > 0) {
@@ -130,13 +130,16 @@ export async function POST(request: Request) {
         end_time: l.endTime,
       }));
 
-      const { error: insertError } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from("lessons")
-        .insert(lessonsToInsert);
+        .insert(lessonsToInsert)
+        .select("id");
 
       if (insertError) {
         console.error("Lesson insert error:", insertError);
         errors.push({ category: "Stunden", message: insertError.message });
+      } else {
+        newInsertedIds.lessons = (inserted || []).map((r) => r.id);
       }
     }
 
@@ -155,13 +158,16 @@ export async function POST(request: Request) {
         info_text: s.infoText,
       }));
 
-      const { error: insertError } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from("substitutions")
-        .insert(subsToInsert);
+        .insert(subsToInsert)
+        .select("id");
 
       if (insertError) {
         console.error("Substitution insert error:", insertError);
         errors.push({ category: "Vertretungen", message: insertError.message });
+      } else {
+        newInsertedIds.substitutions = (inserted || []).map((r) => r.id);
       }
     }
 
@@ -177,13 +183,16 @@ export async function POST(request: Request) {
         read: m.read,
       }));
 
-      const { error: insertError } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from("messages")
-        .insert(messagesToInsert);
+        .insert(messagesToInsert)
+        .select("id");
 
       if (insertError) {
         console.error("Message insert error:", insertError);
         errors.push({ category: "Nachrichten", message: insertError.message });
+      } else {
+        newInsertedIds.messages = (inserted || []).map((r) => r.id);
       }
     }
 
@@ -202,15 +211,63 @@ export async function POST(request: Request) {
         };
       });
 
-      const { error: insertError } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from("homework")
-        .insert(homeworkToInsert);
+        .insert(homeworkToInsert)
+        .select("id");
 
       if (insertError) {
         console.error("Homework insert error:", insertError);
         errors.push({ category: "Hausaufgaben", message: insertError.message });
+      } else {
+        newInsertedIds.homework = (inserted || []).map((r) => r.id);
       }
     }
+
+    // ── Phase 3: Check if critical inserts failed ──
+    // Lessons are required — if they failed, rollback all new inserts and keep old data
+    const lessonsFailed = result.lessons.length > 0 && newInsertedIds.lessons.length === 0;
+
+    if (lessonsFailed) {
+      console.error("Critical sync failure: lesson insert failed, rolling back new inserts");
+
+      // Delete any new data that was inserted
+      await Promise.all([
+        newInsertedIds.substitutions.length > 0
+          ? supabase.from("substitutions").delete().in("id", newInsertedIds.substitutions)
+          : Promise.resolve(),
+        newInsertedIds.messages.length > 0
+          ? supabase.from("messages").delete().in("id", newInsertedIds.messages)
+          : Promise.resolve(),
+        newInsertedIds.homework.length > 0
+          ? supabase.from("homework").delete().in("id", newInsertedIds.homework)
+          : Promise.resolve(),
+      ]);
+
+      return NextResponse.json(
+        {
+          error: "Sync fehlgeschlagen – deine bisherigen Daten wurden beibehalten.",
+          errors,
+        },
+        { status: 500 }
+      );
+    }
+
+    // ── Phase 4: Inserts succeeded — now safe to delete old data ──
+    await Promise.all([
+      oldLessonIds.length > 0
+        ? supabase.from("lessons").delete().in("id", oldLessonIds)
+        : Promise.resolve(),
+      oldSubIds.length > 0
+        ? supabase.from("substitutions").delete().in("id", oldSubIds)
+        : Promise.resolve(),
+      oldMsgIds.length > 0
+        ? supabase.from("messages").delete().in("id", oldMsgIds)
+        : Promise.resolve(),
+      oldHwIds.length > 0
+        ? supabase.from("homework").delete().in("id", oldHwIds)
+        : Promise.resolve(),
+    ]);
 
     // Update last_synced_at
     await supabase
@@ -229,9 +286,9 @@ export async function POST(request: Request) {
       substitutionsCount: newSubstitutions,
       messagesCount: newMessages,
       homeworkCount: newHomework,
-      oldSubstitutionsCount: oldSubs.count || 0,
-      oldMessagesCount: oldMsgs.count || 0,
-      oldHomeworkCount: oldHw.count || 0,
+      oldSubstitutionsCount: oldSubIds.length,
+      oldMessagesCount: oldMsgIds.length,
+      oldHomeworkCount: oldHwIds.length,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
