@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Bell, X } from "lucide-react";
 
-const DISMISS_KEY = "schoolhub-notification-dismissed";
+const DISMISS_KEY = "klasshub-notification-dismissed";
 
 export function NotificationPrompt() {
   const [show, setShow] = useState(false);

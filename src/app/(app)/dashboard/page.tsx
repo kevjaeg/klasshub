@@ -119,7 +119,7 @@ export default async function DashboardPage() {
           <Sparkles className="h-10 w-10 text-primary" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-semibold">Willkommen bei SchoolHub!</h2>
+          <h2 className="text-xl font-semibold">Willkommen bei KlassHub!</h2>
           <p className="text-muted-foreground max-w-xs mx-auto">
             Füge dein erstes Kind hinzu, um Stundenplan und Vertretungen zu sehen.
           </p>

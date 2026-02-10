@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getNotificationSettings } from "@/lib/notifications";
 
-const REMINDER_KEY = "schoolhub-last-hw-reminder";
+const REMINDER_KEY = "klasshub-last-hw-reminder";
 
 function showNotification(title: string, body: string, url: string) {
   if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
@@ -75,7 +75,7 @@ async function checkOverdueReminder(childIds: string[]) {
   const settings = getNotificationSettings();
   if (!settings.homework) return;
 
-  const OVERDUE_KEY = "schoolhub-last-overdue-reminder";
+  const OVERDUE_KEY = "klasshub-last-overdue-reminder";
   const today = new Date().toISOString().split("T")[0];
   if (localStorage.getItem(OVERDUE_KEY) === today) return;
 

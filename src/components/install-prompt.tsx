@@ -9,7 +9,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const DISMISS_KEY = "schoolhub-install-dismissed";
+const DISMISS_KEY = "klasshub-install-dismissed";
 
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
@@ -57,7 +57,7 @@ export function InstallPrompt() {
       <div className="flex items-center gap-3 rounded-lg border bg-background p-3 shadow-lg">
         <Download className="h-5 w-5 shrink-0 text-primary" />
         <p className="flex-1 text-sm">
-          SchoolHub als App installieren für schnelleren Zugriff.
+          KlassHub als App installieren für schnelleren Zugriff.
         </p>
         <Button size="sm" onClick={handleInstall}>
           Installieren

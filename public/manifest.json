@@ -1,6 +1,6 @@
 {
-  "name": "SchoolHub – Alle Schul-Apps an einem Ort",
-  "short_name": "SchoolHub",
+  "name": "KlassHub – Alle Schul-Apps an einem Ort",
+  "short_name": "KlassHub",
   "description": "Stundenplan, Vertretungen und Hausaufgaben aller Kinder in einem Dashboard.",
   "start_url": "/dashboard",
   "scope": "/",

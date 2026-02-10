@@ -51,7 +51,7 @@ export default function LoginPage() {
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
             <GraduationCap className="h-6 w-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl">SchoolHub</CardTitle>
+          <CardTitle className="text-2xl">KlassHub</CardTitle>
           <CardDescription>
             Alle Schul-Apps an einem Ort.
           </CardDescription>

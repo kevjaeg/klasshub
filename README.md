@@ -1,4 +1,4 @@
-# SchoolHub
+# KlassHub
 
 Schulplattform-Aggregator als PWA. Stundenplan, Vertretungen, Hausaufgaben und Nachrichten aus verschiedenen Schulplattformen in einer App.
 

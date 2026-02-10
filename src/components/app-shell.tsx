@@ -62,7 +62,7 @@ export function AppShell({ userName, userEmail, children }: AppShellProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <GraduationCap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold">SchoolHub</span>
+            <span className="font-semibold">KlassHub</span>
           </Link>
 
           <div className="flex items-center gap-1">

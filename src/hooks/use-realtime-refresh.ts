@@ -40,7 +40,7 @@ function notifyChange(payload: RealtimePayload) {
   if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({
       type: "SHOW_NOTIFICATION",
-      title: `SchoolHub – ${config.label}`,
+      title: `KlassHub – ${config.label}`,
       options: {
         body,
         icon: "/icon-192.svg",

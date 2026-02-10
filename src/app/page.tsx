@@ -17,7 +17,7 @@ export default function LandingPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <GraduationCap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-semibold">SchoolHub</span>
+            <span className="text-lg font-semibold">KlassHub</span>
           </div>
           <div className="flex gap-2">
             <Link href="/login">
@@ -79,7 +79,7 @@ export default function LandingPage() {
             <p className="text-muted-foreground">
               WebUntis, Schulmanager, IServ, Moodle, Sdui – Eltern jonglieren
               mit bis zu 6 verschiedenen Apps pro Kind. Wer mehrere Kinder hat,
-              verliert den Überblick. SchoolHub bringt alles zusammen.
+              verliert den Überblick. KlassHub bringt alles zusammen.
             </p>
           </div>
         </section>
@@ -90,7 +90,7 @@ export default function LandingPage() {
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold">Unterstützte Plattformen</h2>
               <p className="text-muted-foreground">
-                SchoolHub verbindet sich mit den gängigsten Schulplattformen.
+                KlassHub verbindet sich mit den gängigsten Schulplattformen.
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -132,7 +132,7 @@ export default function LandingPage() {
             </div>
             <p className="text-sm text-muted-foreground">
               Deine Schule nutzt eine andere App?{" "}
-              <a href="mailto:kontakt@schoolhub.app" className="text-primary hover:underline">
+              <a href="mailto:kontakt@klasshub.app" className="text-primary hover:underline">
                 Schreib uns
               </a>{" "}
               – wir bauen sie ein!
@@ -143,7 +143,7 @@ export default function LandingPage() {
         {/* Features */}
         <section className="border-t bg-muted/30 px-4 py-16">
           <div className="mx-auto max-w-2xl">
-            <h2 className="mb-8 text-center text-2xl font-bold">Was SchoolHub kann</h2>
+            <h2 className="mb-8 text-center text-2xl font-bold">Was KlassHub kann</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex gap-3 rounded-xl border p-5">
                 <Zap className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -186,7 +186,7 @@ export default function LandingPage() {
                 <div>
                   <h3 className="font-semibold text-sm">Installierbar wie eine App</h3>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    SchoolHub ist eine Progressive Web App. Installiere sie auf dem Homescreen
+                    KlassHub ist eine Progressive Web App. Installiere sie auf dem Homescreen
                     deines Handys – fühlt sich an wie eine native App, ohne App Store.
                   </p>
                 </div>
@@ -315,7 +315,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <GraduationCap className="h-4 w-4" />
-            SchoolHub
+            KlassHub
           </div>
           <div className="flex gap-4 text-sm text-muted-foreground">
             <Link href="/datenschutz" className="hover:text-foreground hover:underline">

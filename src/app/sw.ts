@@ -167,7 +167,7 @@ async function replayPendingHomeworkChanges() {
     } catch (e) {
       if (attempt === MAX_RETRIES - 1) {
         // Final retry failed — notify user
-        self.registration.showNotification("SchoolHub", {
+        self.registration.showNotification("KlassHub", {
           body: "Sync fehlgeschlagen – bitte öffne die App erneut.",
           icon: "/icons/icon-192x192.png",
           data: { url: "/dashboard" },

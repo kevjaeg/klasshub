@@ -10,12 +10,12 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://schoolhub.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://klasshub.app";
 
 export const metadata: Metadata = {
   title: {
-    default: "SchoolHub – Alle Schul-Apps in einem Dashboard | WebUntis, Schulmanager & mehr",
-    template: "%s | SchoolHub",
+    default: "KlassHub – Alle Schul-Apps in einem Dashboard | WebUntis, Schulmanager & mehr",
+    template: "%s | KlassHub",
   },
   description:
     "Stundenplan, Vertretungen, Noten – zentral für alle Kinder. Nie wieder zwischen 5 Apps wechseln. Kostenlos in der Beta. DSGVO-konform.",
@@ -23,15 +23,15 @@ export const metadata: Metadata = {
     "Schul-App", "Dashboard", "WebUntis", "Schulmanager", "IServ", "Moodle",
     "Stundenplan", "Vertretungsplan", "Eltern-App", "Schulplattform",
   ],
-  authors: [{ name: "SchoolHub" }],
+  authors: [{ name: "KlassHub" }],
   metadataBase: new URL(SITE_URL),
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "de_DE",
     url: SITE_URL,
-    siteName: "SchoolHub",
-    title: "SchoolHub – Alle Schul-Apps in einem Dashboard",
+    siteName: "KlassHub",
+    title: "KlassHub – Alle Schul-Apps in einem Dashboard",
     description:
       "Stundenplan, Vertretungen, Noten – zentral für alle Kinder. Nie wieder zwischen 5 Apps wechseln.",
     images: [
@@ -39,13 +39,13 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "SchoolHub Dashboard",
+        alt: "KlassHub Dashboard",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SchoolHub – Alle Schul-Apps in einem Dashboard",
+    title: "KlassHub – Alle Schul-Apps in einem Dashboard",
     description:
       "Stundenplan, Vertretungen, Noten – zentral für alle Kinder. Kostenlos in der Beta.",
     images: ["/og-image.png"],
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "SchoolHub",
+    title: "KlassHub",
   },
   icons: {
     icon: "/icon-192.svg",
