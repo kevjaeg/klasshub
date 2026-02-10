@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Ungültige Anfrage" }, { status: 400 });
   }
 
-  const { childId, username, password } = body;
+  let { childId, username, password } = body;
 
   if (!childId || !username || !password) {
     return NextResponse.json(
@@ -50,6 +50,20 @@ export async function POST(request: Request) {
     );
   }
 
+  // Rate limit: 5 minutes between syncs per child
+  if (child.last_synced_at) {
+    const minutesSinceLastSync =
+      (Date.now() - new Date(child.last_synced_at).getTime()) / 60000;
+
+    if (minutesSinceLastSync < 5) {
+      const waitMinutes = Math.ceil(5 - minutesSinceLastSync);
+      return NextResponse.json(
+        { error: `Bitte warte noch ${waitMinutes} ${waitMinutes === 1 ? "Minute" : "Minuten"} bis zum nächsten Sync.` },
+        { status: 429 }
+      );
+    }
+  }
+
   // Determine platform – fall back to webuntis for legacy children
   const platformId: PlatformId = (child.platform as PlatformId) || "webuntis";
   const platformConfig: Record<string, string> = child.platform_config || {};
@@ -63,8 +77,17 @@ export async function POST(request: Request) {
   try {
     const adapter = getAdapter(platformId);
 
-    // Fetch data – credentials are ONLY used here and discarded after
-    const result = await adapter.sync(platformConfig, { username, password });
+    // Fetch data – credentials used once then explicitly overwritten in finally block
+    let result;
+    try {
+      result = await adapter.sync(platformConfig, { username, password });
+    } finally {
+      // Explicitly overwrite credentials before GC
+      username = "\0".repeat(username.length);
+      password = "\0".repeat(password.length);
+      body.username = "\0".repeat(body.username.length);
+      body.password = "\0".repeat(body.password.length);
+    }
 
     // Count old data BEFORE deleting (for notification diff)
     // Also preserve user notes from homework (keyed by external_id)
@@ -235,6 +258,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-  // NOTE: credentials (username, password) go out of scope here and are garbage collected
-  // They are never stored in the database or any persistent storage
 }
