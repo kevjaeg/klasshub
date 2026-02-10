@@ -145,14 +145,14 @@ export default function OfflinePage() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       {/* Offline header */}
-      <div className="sticky top-0 z-50 border-b bg-amber-50 text-amber-800">
+      <div className="sticky top-0 z-50 border-b bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <WifiOff className="h-4 w-4" />
             <div>
               <span className="text-sm font-medium">Offline-Modus</span>
               {cachedTimeStr && (
-                <p className="text-xs text-amber-600">
+                <p className="text-xs text-amber-600 dark:text-amber-500">
                   Daten von {cachedDateStr}, {cachedTimeStr} Uhr
                 </p>
               )}
@@ -160,7 +160,7 @@ export default function OfflinePage() {
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="inline-flex items-center gap-1.5 rounded-md bg-amber-100 px-3 py-1.5 text-xs font-medium hover:bg-amber-200 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-md bg-amber-100 dark:bg-amber-900/30 px-3 py-1.5 text-xs font-medium hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors"
           >
             <RefreshCw className="h-3 w-3" />
             Neu laden
@@ -169,7 +169,7 @@ export default function OfflinePage() {
       </div>
 
       {/* Pending changes banner */}
-      <div className="border-b bg-blue-50 text-blue-700 px-4 py-2">
+      <div className="border-b bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 px-4 py-2">
         <p className="mx-auto max-w-2xl text-xs text-center">
           Änderungen werden automatisch synchronisiert sobald du online bist.
         </p>
@@ -232,9 +232,9 @@ export default function OfflinePage() {
                         key={i}
                         className={`flex items-center gap-3 rounded-lg border p-3 ${
                           isCancelled
-                            ? "border-red-200 bg-red-50"
+                            ? "border-red-200 bg-red-50 dark:border-red-900/30 dark:bg-red-950/20"
                             : isSubstituted
-                            ? "border-orange-200 bg-orange-50"
+                            ? "border-orange-200 bg-orange-50 dark:border-orange-900/30 dark:bg-orange-950/20"
                             : ""
                         }`}
                       >
@@ -252,12 +252,12 @@ export default function OfflinePage() {
                               {isSubstituted && sub?.new_subject ? sub.new_subject : lesson.subject}
                             </span>
                             {isCancelled && (
-                              <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0 rounded-full font-medium">
+                              <span className="text-[10px] bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 px-1.5 py-0 rounded-full font-medium">
                                 Entfällt
                               </span>
                             )}
                             {isSubstituted && (
-                              <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0 rounded-full font-medium">
+                              <span className="text-[10px] bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-1.5 py-0 rounded-full font-medium">
                                 Vertretung
                               </span>
                             )}
@@ -296,9 +296,9 @@ export default function OfflinePage() {
                         key={i}
                         className={`rounded-lg border p-2.5 ${
                           isOverdue
-                            ? "border-red-200 bg-red-50"
+                            ? "border-red-200 bg-red-50 dark:border-red-900/30 dark:bg-red-950/20"
                             : isDueToday
-                            ? "border-orange-200 bg-orange-50"
+                            ? "border-orange-200 bg-orange-50 dark:border-orange-900/30 dark:bg-orange-950/20"
                             : ""
                         }`}
                       >

@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useTransition, useOptimistic, useRef } from "react";
+import { useState, useTransition, useOptimistic, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, Check, Loader2, ArrowUpDown, StickyNote } from "lucide-react";
+import { AlertCircle, Check, Loader2, ArrowUpDown, StickyNote, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import { HomeworkCalendarButton } from "@/components/homework-calendar-button";
 import type { Homework } from "@/lib/types";
+import { triggerConfetti } from "@/lib/confetti";
 
 type SortMode = "due_date" | "subject" | "priority";
 
@@ -127,7 +128,16 @@ export function HomeworkList({ homework, childMap }: HomeworkListProps) {
         if (!res.ok) {
           toast.error("Fehler beim Speichern");
         } else {
-          toast.success(completed ? "Hausaufgabe erledigt" : "Als offen markiert");
+          // Check if this was the last open homework being completed
+          const remainingOpen = optimisticHomework.filter(
+            (h) => !h.completed && h.id !== id
+          ).length;
+          if (completed && remainingOpen === 0) {
+            triggerConfetti();
+            toast.success("Alles erledigt! Goenn dir eine Pause.");
+          } else {
+            toast.success(completed ? "Hausaufgabe erledigt" : "Als offen markiert");
+          }
         }
       } catch {
         // Register background sync so the SW replays when back online
@@ -207,10 +217,10 @@ export function HomeworkList({ homework, childMap }: HomeworkListProps) {
               type="button"
               onClick={() => toggleCompleted(hw.id, !hw.completed)}
               disabled={!!togglingId}
-              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all ${
                 hw.completed
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-muted-foreground/30 hover:border-primary"
+                  ? "border-primary bg-primary text-primary-foreground scale-100 animate-[bounce-check_0.3s_ease-in-out]"
+                  : "border-muted-foreground/30 hover:border-primary hover:scale-110 active:scale-95"
               } ${isToggling ? "opacity-50" : ""}`}
             >
               {isToggling ? (
@@ -408,6 +418,14 @@ export function HomeworkList({ homework, childMap }: HomeworkListProps) {
           {completedHomework.map((hw) => (
             <HomeworkItem key={hw.id} hw={hw} />
           ))}
+        </div>
+      )}
+
+      {openHomework.length === 0 && completedHomework.length > 0 && (
+        <div className="flex flex-col items-center gap-2 py-8 text-center">
+          <PartyPopper className="h-8 w-8 text-primary" />
+          <p className="text-sm font-medium">Alles erledigt!</p>
+          <p className="text-xs text-muted-foreground">Goenn dir eine Pause.</p>
         </div>
       )}
 
