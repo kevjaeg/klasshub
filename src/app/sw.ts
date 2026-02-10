@@ -130,13 +130,53 @@ self.addEventListener("sync", (event: SyncEvent) => {
 });
 
 async function replayPendingHomeworkChanges() {
-  // The BackgroundSyncPlugin already handles replaying failed requests
-  // from the "offline-mutations" queue. This named sync event serves as
-  // an additional trigger for any client-registered sync requests.
-  // Notify all clients that sync is happening
-  const clients = await self.clients.matchAll({ type: "window" });
-  for (const client of clients) {
-    client.postMessage({ type: "BACKGROUND_SYNC_COMPLETE", tag: "sync-homework" });
+  const MAX_RETRIES = 3;
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      // The BackgroundSyncPlugin already handles replaying failed requests
+      // from the "offline-mutations" queue. This named sync event serves as
+      // an additional trigger — open the queue and replay manually.
+      const cache = await caches.open("api-mutations");
+      const requests = await cache.keys();
+
+      for (const request of requests) {
+        const cachedResponse = await cache.match(request);
+        if (!cachedResponse) continue;
+
+        const body = await cachedResponse.clone().text();
+        const response = await fetch(request.url, {
+          method: request.method,
+          headers: request.headers,
+          body,
+        });
+
+        if (response.ok) {
+          await cache.delete(request);
+        } else {
+          throw new Error(`Replay failed: ${response.status}`);
+        }
+      }
+
+      // Success — notify clients
+      const clients = await self.clients.matchAll({ type: "window" });
+      for (const client of clients) {
+        client.postMessage({ type: "BACKGROUND_SYNC_COMPLETE", tag: "sync-homework" });
+      }
+      return;
+    } catch (e) {
+      if (attempt === MAX_RETRIES - 1) {
+        // Final retry failed — notify user
+        self.registration.showNotification("SchoolHub", {
+          body: "Sync fehlgeschlagen – bitte öffne die App erneut.",
+          icon: "/icons/icon-192x192.png",
+          data: { url: "/dashboard" },
+        });
+        throw e;
+      }
+      // Exponential backoff: 1s, 2s, 4s
+      await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt)));
+    }
   }
 }
 
