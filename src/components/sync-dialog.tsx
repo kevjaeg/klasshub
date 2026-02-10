@@ -17,7 +17,7 @@ import { RefreshCw, Loader2, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { PLATFORMS } from "@/lib/platforms/registry";
 import type { PlatformId } from "@/lib/platforms/types";
-import { sendSyncNotifications } from "@/lib/notifications";
+import { sendSyncNotifications, requestPermission } from "@/lib/notifications";
 
 interface SyncDialogProps {
   childId: string;
@@ -75,6 +75,14 @@ export function SyncDialog({ childId, childName, platformId }: SyncDialogProps) 
             ? `Sync erfolgreich! ${parts.join(", ")} geladen.`
             : "Sync erfolgreich! Keine neuen Daten gefunden."
         );
+      }
+
+      // Ask for notification permission after first successful sync
+      if (typeof Notification !== "undefined" && Notification.permission === "default") {
+        const permission = await requestPermission();
+        if (permission === "granted") {
+          toast.success("Push-Benachrichtigungen aktiviert!");
+        }
       }
 
       // Send browser notification if there are new items
