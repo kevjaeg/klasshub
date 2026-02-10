@@ -35,7 +35,7 @@ export function OfflineBanner() {
 
   if (showReconnected) {
     return (
-      <div className="sticky top-12 z-40 border-b bg-green-50 text-green-800 px-4 py-2 text-center text-sm flex items-center justify-center gap-2 animate-in slide-in-from-top duration-300">
+      <div className="sticky top-12 z-40 border-b bg-green-50 text-green-800 dark:bg-green-950/30 dark:text-green-400 px-4 py-2 text-center text-sm flex items-center justify-center gap-2 animate-in slide-in-from-top duration-300">
         <Wifi className="h-4 w-4" />
         <span>Wieder online – Änderungen werden synchronisiert</span>
       </div>
@@ -47,7 +47,7 @@ export function OfflineBanner() {
     : null;
 
   return (
-    <div className="sticky top-12 z-40 border-b bg-amber-50 text-amber-800 px-4 py-2 text-center text-sm flex items-center justify-center gap-2">
+    <div className="sticky top-12 z-40 border-b bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400 px-4 py-2 text-center text-sm flex items-center justify-center gap-2">
       <WifiOff className="h-4 w-4 shrink-0" />
       <span>
         Offline-Modus{timeStr ? ` – Daten von ${timeStr} Uhr` : ""}
