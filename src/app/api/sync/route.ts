@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdapter } from "@/lib/platforms/registry";
 import type { PlatformId } from "@/lib/platforms/types";
 import { dowBerlin } from "@/lib/date-utils";
+import { safeString, safeSyncResult } from "@/lib/sanitize";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -89,9 +90,9 @@ export async function POST(request: Request) {
     const adapter = getAdapter(platformId);
 
     // Fetch data – credentials used once then explicitly overwritten in finally block
-    let result;
+    let rawResult;
     try {
-      result = await adapter.sync(platformConfig, { username, password });
+      rawResult = await adapter.sync(platformConfig, { username, password });
     } finally {
       // Explicitly overwrite credentials before GC
       username = "\0".repeat(username.length);
@@ -99,6 +100,9 @@ export async function POST(request: Request) {
       body.username = "\0".repeat(body.username.length);
       body.password = "\0".repeat(body.password.length);
     }
+
+    // Defensive: ensure arrays even if adapter returns malformed data
+    const result = safeSyncResult(rawResult) as typeof rawResult;
 
     // ── Phase 1: Snapshot old data IDs + preserve user edits ──
     const [oldLessons, oldSubs, oldMsgs, oldHw, existingHomework] = await Promise.all([
@@ -132,9 +136,9 @@ export async function POST(request: Request) {
     if (result.lessons.length > 0) {
       const lessonsToInsert = result.lessons.map((l) => ({
         child_id: childId,
-        subject: l.subject,
-        teacher: l.teacher,
-        room: l.room,
+        subject: safeString(l.subject, 100) || "–",
+        teacher: safeString(l.teacher, 100),
+        room: safeString(l.room, 50),
         day_of_week: l.dayOfWeek,
         lesson_number: l.lessonNumber,
         start_time: l.startTime,
@@ -160,13 +164,13 @@ export async function POST(request: Request) {
         child_id: childId,
         date: s.date,
         lesson_number: s.lessonNumber,
-        original_subject: s.originalSubject,
-        new_subject: s.newSubject,
-        original_teacher: s.originalTeacher,
-        new_teacher: s.newTeacher,
-        new_room: s.newRoom,
+        original_subject: safeString(s.originalSubject, 100),
+        new_subject: safeString(s.newSubject, 100),
+        original_teacher: safeString(s.originalTeacher, 100),
+        new_teacher: safeString(s.newTeacher, 100),
+        new_room: safeString(s.newRoom, 50),
         type: s.type,
-        info_text: s.infoText,
+        info_text: safeString(s.infoText, 500),
       }));
 
       const { data: inserted, error: insertError } = await supabase
@@ -187,9 +191,9 @@ export async function POST(request: Request) {
       const messagesToInsert = result.messages.map((m) => ({
         child_id: childId,
         external_id: m.id,
-        title: m.title,
-        body: m.body,
-        sender: m.sender,
+        title: safeString(m.title, 200) || "–",
+        body: safeString(m.body, 5000),
+        sender: safeString(m.sender, 100),
         date: m.date,
         read: m.read,
       }));
@@ -214,8 +218,8 @@ export async function POST(request: Request) {
         return {
           child_id: childId,
           external_id: h.id,
-          subject: h.subject,
-          description: h.description,
+          subject: safeString(h.subject, 100) || "–",
+          description: safeString(h.description, 2000) || "",
           due_date: h.dueDate,
           completed: existing ? existing.completed : h.completed,
           notes: existing?.notes ?? null,

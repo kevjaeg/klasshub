@@ -79,7 +79,12 @@ function LessonRow({
             </Badge>
           )}
         </div>
-        <div className="text-xs text-muted-foreground truncate">
+        <div
+          className="text-xs text-muted-foreground truncate"
+          title={isSubstituted
+            ? `${substitution.new_teacher || lesson.teacher || ""}${substitution.new_room ? ` · ${substitution.new_room}` : lesson.room ? ` · ${lesson.room}` : ""}`
+            : `${lesson.teacher || ""}${lesson.room ? ` · ${lesson.room}` : ""}`}
+        >
           {isSubstituted
             ? `${substitution.new_teacher || lesson.teacher || ""}${substitution.new_room ? ` · ${substitution.new_room}` : lesson.room ? ` · ${lesson.room}` : ""}`
             : `${lesson.teacher || ""}${lesson.room ? ` · ${lesson.room}` : ""}`}
@@ -87,7 +92,7 @@ function LessonRow({
         {substitution?.info_text && (
           <div className="mt-1 flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400">
             <AlertTriangle className="h-3 w-3 shrink-0" />
-            <span className="truncate">{substitution.info_text}</span>
+            <span className="truncate" title={substitution.info_text}>{substitution.info_text}</span>
           </div>
         )}
       </div>
