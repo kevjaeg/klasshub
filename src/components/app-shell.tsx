@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { GraduationCap, LayoutDashboard, CalendarDays, Settings, LogOut, Users, Mail, ClipboardList, Sun, Moon } from "lucide-react";
+import { OfflineBanner } from "@/components/offline-banner";
 
 interface AppShellProps {
   userName: string;
@@ -106,6 +107,8 @@ export function AppShell({ userName, userEmail, children }: AppShellProps) {
           </div>
         </div>
       </header>
+
+      <OfflineBanner />
 
       {/* Main Content */}
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
