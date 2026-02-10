@@ -154,6 +154,8 @@ export default async function DashboardPage() {
   const daysToFetch = todayDow <= 5 ? [todayDow] : [];
   if (tomorrowDow <= 5) daysToFetch.push(tomorrowDow);
 
+  const maxSubDate = getDateString(14); // Only next 2 weeks of substitutions
+
   const [lessonsResult, subsResult, messagesResult, homeworkResult] = await Promise.all([
     supabase
       .from("lessons")
@@ -166,19 +168,23 @@ export default async function DashboardPage() {
       .select("*")
       .in("child_id", childIds)
       .gte("date", todayDate)
+      .lte("date", maxSubDate)
       .order("date")
       .order("lesson_number"),
     supabase
       .from("messages")
       .select("*")
       .in("child_id", childIds)
-      .order("date", { ascending: false }),
+      .order("date", { ascending: false })
+      .limit(10),
     supabase
       .from("homework")
       .select("*")
       .in("child_id", childIds)
       .eq("completed", false)
-      .order("due_date"),
+      .gte("due_date", getDateString(-7))
+      .order("due_date")
+      .limit(20),
   ]);
 
   const lessons = (lessonsResult.data || []) as Lesson[];
