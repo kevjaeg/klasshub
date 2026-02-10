@@ -62,5 +62,6 @@ export interface Homework {
   description: string;
   due_date: string;
   completed: boolean;
+  notes: string | null;
   synced_at: string;
 }
