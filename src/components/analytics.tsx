@@ -4,7 +4,7 @@ import Script from "next/script";
 
 // ─── Configuration ───────────────────────────────────────────────
 // Set ONE of these env vars to activate analytics:
-//   NEXT_PUBLIC_PLAUSIBLE_DOMAIN  → e.g. "schoolhub.app"
+//   NEXT_PUBLIC_PLAUSIBLE_DOMAIN  → e.g. "klasshub.app"
 //   NEXT_PUBLIC_GA_ID             → e.g. "G-XXXXXXXXXX"
 
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;

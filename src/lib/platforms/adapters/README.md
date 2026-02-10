@@ -1,6 +1,6 @@
 # Platform Adapters
 
-Each adapter connects SchoolHub to a school platform (WebUntis, IServ, Schulmanager, Moodle, Sdui, etc.).
+Each adapter connects KlassHub to a school platform (WebUntis, IServ, Schulmanager, Moodle, Sdui, etc.).
 
 ## Architecture
 

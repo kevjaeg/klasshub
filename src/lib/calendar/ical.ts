@@ -90,7 +90,7 @@ export function generateICalFeed(
         description = teacher;
       }
 
-      const uid = `${dateStr}-${lesson.lesson_number}-${lesson.child_id}@schoolhub`;
+      const uid = `${dateStr}-${lesson.lesson_number}-${lesson.child_id}@klasshub`;
 
       events.push(
         [
@@ -114,7 +114,7 @@ export function generateICalFeed(
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    `PRODID:-//SchoolHub//Stundenplan ${escapeIcal(childName)}//DE`,
+    `PRODID:-//KlassHub//Stundenplan ${escapeIcal(childName)}//DE`,
     `X-WR-CALNAME:${escapeIcal(childName)} – Stundenplan`,
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",

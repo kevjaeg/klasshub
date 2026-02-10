@@ -1,4 +1,4 @@
-const SETTINGS_KEY = "schoolhub-notification-settings";
+const SETTINGS_KEY = "klasshub-notification-settings";
 
 export interface NotificationSettings {
   substitutions: boolean;
@@ -73,7 +73,7 @@ export function sendSyncNotifications(
   if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({
       type: "SHOW_NOTIFICATION",
-      title: `SchoolHub – ${childName}`,
+      title: `KlassHub – ${childName}`,
       options: {
         body,
         icon: "/icon-192.svg",
@@ -85,7 +85,7 @@ export function sendSyncNotifications(
       },
     });
   } else {
-    new Notification(`SchoolHub – ${childName}`, {
+    new Notification(`KlassHub – ${childName}`, {
       body,
       icon: "/icon-192.svg",
       tag: `sync-${childName}`,

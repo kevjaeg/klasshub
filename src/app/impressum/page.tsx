@@ -23,7 +23,7 @@ export default function ImpressumPage() {
 
         <h2 className="text-lg font-semibold text-foreground">Haftungsausschluss</h2>
         <p>
-          SchoolHub ist ein unabhängiges Produkt und steht in keiner Verbindung
+          KlassHub ist ein unabhängiges Produkt und steht in keiner Verbindung
           zu WebUntis, Untis GmbH oder anderen Schulplattform-Anbietern.
         </p>
       </div>

@@ -7,8 +7,8 @@ import { ForceLightMode } from "@/components/force-light-mode";
 import { DEMO_LESSONS, generateDemoSubstitutions, generateDemoMessages, generateDemoHomework } from "@/lib/webuntis/demo-data";
 
 export const metadata = {
-  title: "SchoolHub Demo – So sieht dein Dashboard aus",
-  description: "Interaktive Demo von SchoolHub. Sieh dir den Stundenplan, Vertretungen und Hausaufgaben an – ohne Registrierung.",
+  title: "KlassHub Demo – So sieht dein Dashboard aus",
+  description: "Interaktive Demo von KlassHub. Sieh dir den Stundenplan, Vertretungen und Hausaufgaben an – ohne Registrierung.",
 };
 
 const DAY_NAMES = ["", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
@@ -73,7 +73,7 @@ export default function DemoPage() {
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
             <GraduationCap className="h-3.5 w-3.5 text-primary-foreground" />
           </div>
-          <span className="font-semibold">SchoolHub</span>
+          <span className="font-semibold">KlassHub</span>
           <span className="ml-auto text-xs text-muted-foreground">Demo-Nutzer</span>
         </div>
       </header>

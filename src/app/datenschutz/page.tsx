@@ -56,7 +56,7 @@ export default function DatenschutzPage() {
 
         <h2 className="text-lg font-semibold text-foreground">6. Minderjährige</h2>
         <p>
-          SchoolHub richtet sich an Eltern und Erziehungsberechtigte.
+          KlassHub richtet sich an Eltern und Erziehungsberechtigte.
           Schülerdaten werden nur im Auftrag und mit Einwilligung der Eltern verarbeitet.
         </p>
 

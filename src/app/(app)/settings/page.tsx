@@ -194,7 +194,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
           <p>
-            SchoolHub speichert deine Daten DSGVO-konform in der EU.
+            KlassHub speichert deine Daten DSGVO-konform in der EU.
             Passwörter für Schul-Plattformen werden <strong>nie</strong> gespeichert.
           </p>
           <p>

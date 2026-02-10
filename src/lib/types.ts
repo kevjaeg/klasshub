@@ -1,4 +1,4 @@
-// Database types for SchoolHub
+// Database types for KlassHub
 
 export interface Child {
   id: string;

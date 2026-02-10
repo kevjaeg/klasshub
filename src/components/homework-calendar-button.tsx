@@ -14,12 +14,12 @@ function generateIcs(subject: string, description: string, dueDate: string): str
   nextDay.setDate(nextDay.getDate() + 1);
   const nextDayFormatted = nextDay.toISOString().split("T")[0].replace(/-/g, "");
   const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-  const uid = `hw-${dateFormatted}-${Math.random().toString(36).slice(2, 9)}@schoolhub`;
+  const uid = `hw-${dateFormatted}-${Math.random().toString(36).slice(2, 9)}@klasshub`;
 
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//SchoolHub//Homework//DE",
+    "PRODID:-//KlassHub//Homework//DE",
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${now}`,

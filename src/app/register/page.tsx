@@ -96,7 +96,7 @@ export default function RegisterPage() {
           </div>
           <CardTitle className="text-2xl">Konto erstellen</CardTitle>
           <CardDescription>
-            Registriere dich kostenlos bei SchoolHub.
+            Registriere dich kostenlos bei KlassHub.
           </CardDescription>
         </CardHeader>
         <CardContent>
