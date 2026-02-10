@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, LayoutDashboard, CalendarDays, Settings, LogOut, Users, Mail, ClipboardList, Sun, Moon } from "lucide-react";
+import { GraduationCap, LayoutDashboard, CalendarDays, Settings, LogOut, Users, Mail, ClipboardList, Sun, Moon, BarChart3 } from "lucide-react";
 import { OfflineBanner } from "@/components/offline-banner";
 
 interface AppShellProps {
@@ -26,7 +26,7 @@ const navItems = [
   { href: "/dashboard", label: "Übersicht", icon: LayoutDashboard },
   { href: "/timetable", label: "Stundenplan", icon: CalendarDays },
   { href: "/homework", label: "Aufgaben", icon: ClipboardList },
-  { href: "/messages", label: "Nachrichten", icon: Mail },
+  { href: "/insights", label: "Statistik", icon: BarChart3 },
   { href: "/children", label: "Kinder", icon: Users },
 ];
 
