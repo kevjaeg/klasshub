@@ -68,10 +68,20 @@ export async function POST(request: Request) {
   const platformId: PlatformId = (child.platform as PlatformId) || "webuntis";
   const platformConfig: Record<string, string> = child.platform_config || {};
 
-  // Legacy support: populate config from old webuntis_* columns if needed
-  if (platformId === "webuntis" && !platformConfig.server) {
-    if (child.webuntis_server) platformConfig.server = child.webuntis_server;
-    if (child.webuntis_school) platformConfig.school = child.webuntis_school;
+  // Strict config validation for WebUntis (including legacy column fallback)
+  if (platformId === "webuntis") {
+    const server = platformConfig.server || child.webuntis_server;
+    const school = platformConfig.school || child.webuntis_school;
+
+    if (!server || !school) {
+      return NextResponse.json(
+        { error: "WebUntis Konfiguration unvollständig. Bitte Kind bearbeiten und Server/Schulkürzel eintragen." },
+        { status: 400 }
+      );
+    }
+
+    platformConfig.server = server;
+    platformConfig.school = school;
   }
 
   try {
