@@ -3,6 +3,7 @@ import { WebUntisAdapter } from "./adapters/webuntis";
 import { IServAdapter } from "./adapters/iserv";
 import { SchulmanagerAdapter } from "./adapters/schulmanager";
 import { MoodleAdapter } from "./adapters/moodle";
+import { SduiAdapter } from "./adapters/sdui";
 
 // Platform metadata for UI
 export const PLATFORMS: Record<PlatformId, PlatformInfo> = {
@@ -69,6 +70,22 @@ export const PLATFORMS: Record<PlatformId, PlatformInfo> = {
       },
     ],
   },
+  sdui: {
+    id: "sdui",
+    name: "Sdui",
+    description: "Stundenplan, Nachrichten, Aufgaben",
+    color: "bg-purple-100 text-purple-800",
+    fields: [
+      {
+        key: "schoolId",
+        label: "Schul-ID",
+        placeholder: "z.B. 12345",
+        type: "text",
+        required: true,
+        helpText: "Findest du in der Sdui-App unter Einstellungen → Schule",
+      },
+    ],
+  },
 };
 
 // Adapter instances
@@ -77,6 +94,7 @@ const adapters: Record<PlatformId, PlatformAdapter> = {
   iserv: new IServAdapter(),
   schulmanager: new SchulmanagerAdapter(),
   moodle: new MoodleAdapter(),
+  sdui: new SduiAdapter(),
 };
 
 export function getAdapter(platformId: PlatformId): PlatformAdapter {

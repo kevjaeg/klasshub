@@ -1,6 +1,6 @@
 // Shared types for all school platform adapters
 
-export type PlatformId = "webuntis" | "iserv" | "schulmanager" | "moodle";
+export type PlatformId = "webuntis" | "iserv" | "schulmanager" | "moodle" | "sdui";
 
 export interface PlatformInfo {
   id: PlatformId;
