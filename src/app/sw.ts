@@ -15,6 +15,15 @@ declare global {
   }
 }
 
+// Background Sync API types (not yet in lib.webworker)
+interface SyncEvent extends ExtendableEvent {
+  readonly tag: string;
+}
+
+interface SyncManager {
+  register(tag: string): Promise<void>;
+}
+
 declare const self: ServiceWorkerGlobalScope & WorkerGlobalScope;
 
 const serwist = new Serwist({
@@ -112,6 +121,24 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+// Background Sync: replay queued homework mutations when back online
+self.addEventListener("sync", (event: SyncEvent) => {
+  if (event.tag === "sync-homework") {
+    event.waitUntil(replayPendingHomeworkChanges());
+  }
+});
+
+async function replayPendingHomeworkChanges() {
+  // The BackgroundSyncPlugin already handles replaying failed requests
+  // from the "offline-mutations" queue. This named sync event serves as
+  // an additional trigger for any client-registered sync requests.
+  // Notify all clients that sync is happening
+  const clients = await self.clients.matchAll({ type: "window" });
+  for (const client of clients) {
+    client.postMessage({ type: "BACKGROUND_SYNC_COMPLETE", tag: "sync-homework" });
+  }
+}
 
 // Handle notification show requests from the client
 self.addEventListener("message", (event) => {

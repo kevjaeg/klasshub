@@ -130,7 +130,18 @@ export function HomeworkList({ homework, childMap }: HomeworkListProps) {
           toast.success(completed ? "Hausaufgabe erledigt" : "Als offen markiert");
         }
       } catch {
-        toast.error("Verbindungsfehler. Bitte versuche es erneut.");
+        // Register background sync so the SW replays when back online
+        if ("serviceWorker" in navigator) {
+          const reg = await navigator.serviceWorker.ready;
+          if ("sync" in reg) {
+            await (reg as unknown as { sync: { register: (tag: string) => Promise<void> } }).sync.register("sync-homework");
+            toast.info("Offline – Änderung wird synchronisiert sobald du online bist.");
+          } else {
+            toast.error("Verbindungsfehler. Bitte versuche es erneut.");
+          }
+        } else {
+          toast.error("Verbindungsfehler. Bitte versuche es erneut.");
+        }
       }
 
       setTogglingId(null);
@@ -159,7 +170,17 @@ export function HomeworkList({ homework, childMap }: HomeworkListProps) {
           toast.error("Notiz konnte nicht gespeichert werden");
         }
       } catch {
-        toast.error("Verbindungsfehler");
+        if ("serviceWorker" in navigator) {
+          const reg = await navigator.serviceWorker.ready;
+          if ("sync" in reg) {
+            await (reg as unknown as { sync: { register: (tag: string) => Promise<void> } }).sync.register("sync-homework");
+            toast.info("Offline – Notiz wird synchronisiert sobald du online bist.");
+          } else {
+            toast.error("Verbindungsfehler");
+          }
+        } else {
+          toast.error("Verbindungsfehler");
+        }
       }
       setSavingNotes(false);
     }
