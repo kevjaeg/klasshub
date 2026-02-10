@@ -67,11 +67,21 @@ export async function POST(request: Request) {
     const result = await adapter.sync(platformConfig, { username, password });
 
     // Count old data BEFORE deleting (for notification diff)
-    const [oldSubs, oldMsgs, oldHw] = await Promise.all([
+    // Also preserve user notes from homework (keyed by external_id)
+    const [oldSubs, oldMsgs, oldHw, existingHomework] = await Promise.all([
       supabase.from("substitutions").select("id", { count: "exact", head: true }).eq("child_id", childId),
       supabase.from("messages").select("id", { count: "exact", head: true }).eq("child_id", childId),
       supabase.from("homework").select("id", { count: "exact", head: true }).eq("child_id", childId),
+      supabase.from("homework").select("external_id, notes, completed").eq("child_id", childId),
     ]);
+
+    // Build lookup for preserving user-set notes and completed status
+    const hwNotesMap = new Map<string, { notes: string | null; completed: boolean }>();
+    for (const hw of existingHomework.data || []) {
+      if (hw.external_id) {
+        hwNotesMap.set(hw.external_id, { notes: hw.notes, completed: hw.completed });
+      }
+    }
 
     // Delete old data for this child
     await Promise.all([
@@ -154,16 +164,20 @@ export async function POST(request: Request) {
       }
     }
 
-    // Insert new homework
+    // Insert new homework (preserve user notes and completed status from previous sync)
     if (result.homework && result.homework.length > 0) {
-      const homeworkToInsert = result.homework.map((h) => ({
-        child_id: childId,
-        external_id: h.id,
-        subject: h.subject,
-        description: h.description,
-        due_date: h.dueDate,
-        completed: h.completed,
-      }));
+      const homeworkToInsert = result.homework.map((h) => {
+        const existing = h.id ? hwNotesMap.get(h.id) : undefined;
+        return {
+          child_id: childId,
+          external_id: h.id,
+          subject: h.subject,
+          description: h.description,
+          due_date: h.dueDate,
+          completed: existing ? existing.completed : h.completed,
+          notes: existing?.notes ?? null,
+        };
+      });
 
       const { error: insertError } = await supabase
         .from("homework")
