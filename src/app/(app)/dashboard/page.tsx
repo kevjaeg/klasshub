@@ -8,30 +8,12 @@ import { formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
 import { DemoButton } from "@/components/demo-button";
 import type { Child, Lesson, Substitution, Message, Homework } from "@/lib/types";
+import { todayBerlin, dateBerlin, dowBerlin } from "@/lib/date-utils";
 
 const DAY_NAMES = ["", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
-const SHORT_DAYS = ["", "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
-
-function getTodayDayOfWeek(): number {
-  const day = new Date().getDay();
-  return day === 0 ? 7 : day;
-}
 
 function formatTime(time: string): string {
   return time.slice(0, 5);
-}
-
-function getDateString(daysFromNow: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + daysFromNow);
-  return d.toISOString().split("T")[0];
-}
-
-function getDowForOffset(offset: number): number {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  const day = d.getDay();
-  return day === 0 ? 7 : day;
 }
 
 function formatDateShort(dateStr: string): string {
@@ -116,9 +98,9 @@ function LessonRow({
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const todayDow = getTodayDayOfWeek();
-  const todayDate = getDateString(0);
-  const tomorrowDate = getDateString(1);
+  const todayDow = dowBerlin();
+  const todayDate = todayBerlin();
+  const tomorrowDate = dateBerlin(1);
 
   const { data: children } = await supabase
     .from("children")
@@ -150,11 +132,11 @@ export default async function DashboardPage() {
   const childIds = children.map((c: Child) => c.id);
 
   // Fetch lessons for today and tomorrow
-  const tomorrowDow = getDowForOffset(1);
+  const tomorrowDow = dowBerlin(1);
   const daysToFetch = todayDow <= 5 ? [todayDow] : [];
   if (tomorrowDow <= 5) daysToFetch.push(tomorrowDow);
 
-  const maxSubDate = getDateString(14); // Only next 2 weeks of substitutions
+  const maxSubDate = dateBerlin(14); // Only next 2 weeks of substitutions
 
   const [lessonsResult, subsResult, messagesResult, homeworkResult] = await Promise.all([
     supabase
@@ -182,7 +164,7 @@ export default async function DashboardPage() {
       .select("*")
       .in("child_id", childIds)
       .eq("completed", false)
-      .gte("due_date", getDateString(-7))
+      .gte("due_date", dateBerlin(-7))
       .order("due_date")
       .limit(20),
   ]);

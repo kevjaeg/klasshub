@@ -4,21 +4,18 @@ import { Badge } from "@/components/ui/badge";
 import { BarChart3, TrendingUp, TrendingDown, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import type { Child, Homework, Substitution } from "@/lib/types";
 import { WeeklyChart } from "./weekly-chart";
+import { todayBerlin, dateBerlin, dowBerlin } from "@/lib/date-utils";
 
 const DAY_NAMES_SHORT = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
 const DAY_NAMES = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 
 function getWeekDates(): { start: string; end: string; dates: string[] } {
-  const now = new Date();
-  const dayOfWeek = now.getDay(); // 0=Sun
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((dayOfWeek + 6) % 7));
+  const dow = dowBerlin(); // 1=Mon..7=Sun
+  const mondayOffset = -(dow - 1);
 
   const dates: string[] = [];
   for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    dates.push(d.toISOString().split("T")[0]);
+    dates.push(dateBerlin(mondayOffset + i));
   }
 
   return {
@@ -29,11 +26,7 @@ function getWeekDates(): { start: string; end: string; dates: string[] } {
 }
 
 function getLastNWeeksDates(n: number): { start: string; end: string } {
-  const now = new Date();
-  const end = now.toISOString().split("T")[0];
-  const start = new Date(now);
-  start.setDate(now.getDate() - n * 7);
-  return { start: start.toISOString().split("T")[0], end };
+  return { start: dateBerlin(-n * 7), end: todayBerlin() };
 }
 
 export default async function InsightsPage() {

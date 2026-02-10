@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAdapter } from "@/lib/platforms/registry";
 import type { PlatformId } from "@/lib/platforms/types";
+import { dowBerlin } from "@/lib/date-utils";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -292,8 +293,8 @@ export async function POST(request: Request) {
     // Warn if no lessons returned on a weekday
     let warning: string | null = null;
     if (result.lessons.length === 0) {
-      const dayOfWeek = new Date().getDay();
-      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      const dow = dowBerlin();
+      if (dow >= 1 && dow <= 5) {
         console.warn(`No lessons returned from sync for child ${childId}`);
         warning = "Keine Stunden gefunden – ist heute schulfrei?";
       }
