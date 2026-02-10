@@ -223,6 +223,74 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Pricing */}
+        <section className="border-t bg-muted/30 px-4 py-16">
+          <div className="mx-auto max-w-2xl space-y-8">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold">Einfache Preise</h2>
+              <p className="text-muted-foreground">
+                Jetzt kostenlos starten. Später fair bezahlen.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {/* Beta */}
+              <div className="relative rounded-xl border-2 border-primary p-5 space-y-3 shadow-sm">
+                <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold text-primary uppercase tracking-wide">
+                  Aktuell
+                </div>
+                <div>
+                  <span className="text-3xl font-bold">0 &euro;</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  3 Monate komplett kostenlos. Alle Features, keine Limits.
+                </p>
+                <ul className="space-y-1.5 text-xs">
+                  <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-primary shrink-0" />Alle Plattformen</li>
+                  <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-primary shrink-0" />Unbegrenzt Kinder</li>
+                  <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-primary shrink-0" />Push-Benachrichtigungen</li>
+                  <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-primary shrink-0" />Offline-Modus</li>
+                </ul>
+                <TrackedLink href="/register" event="cta_click" props={{ location: "pricing_beta" }}>
+                  <Button className="w-full" size="sm">
+                    Kostenlos starten
+                  </Button>
+                </TrackedLink>
+              </div>
+
+              {/* Early Bird */}
+              <div className="relative rounded-xl border p-5 space-y-3">
+                <div className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-[10px] font-semibold text-orange-700 uppercase tracking-wide">
+                  Early Bird &ndash; 35% g&uuml;nstiger
+                </div>
+                <div>
+                  <span className="text-3xl font-bold">39 &euro;</span>
+                  <span className="text-sm text-muted-foreground"> / Jahr</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Nur <span className="font-medium text-foreground">3,25 &euro;/Monat</span>. Sicherst du dir jetzt, gilt der Preis f&uuml;r immer.
+                </p>
+                <div className="text-[10px] text-muted-foreground line-through">
+                  Normalpreis: 59,88 &euro;/Jahr
+                </div>
+              </div>
+
+              {/* Regular */}
+              <div className="relative rounded-xl border p-5 space-y-3">
+                <div className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+                  Sp&auml;ter
+                </div>
+                <div>
+                  <span className="text-3xl font-bold">4,99 &euro;</span>
+                  <span className="text-sm text-muted-foreground"> / Monat</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Oder <span className="font-medium text-foreground">49 &euro;/Jahr</span> &ndash; 2 Monate geschenkt.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="border-t bg-primary px-4 py-16 text-primary-foreground">
           <div className="mx-auto max-w-lg text-center space-y-4">
