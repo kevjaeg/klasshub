@@ -55,6 +55,11 @@ export default function LandingPage() {
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </TrackedLink>
+                <Link href="/demo">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-base">
+                    Demo ansehen
+                  </Button>
+                </Link>
               </div>
               <p className="text-xs text-muted-foreground">
                 Einrichtung in unter 2 Minuten &middot; Keine Kreditkarte nötig
@@ -91,16 +96,16 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 { name: "WebUntis", status: "live" as const, color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" },
-                { name: "Schulmanager", status: "soon" as const, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
-                { name: "IServ", status: "soon" as const, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
-                { name: "Moodle", status: "soon" as const, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" },
-                { name: "Sdui", status: "soon" as const, color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" },
+                { name: "Schulmanager", status: "beta" as const, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+                { name: "IServ", status: "beta" as const, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+                { name: "Moodle", status: "beta" as const, color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" },
+                { name: "Sdui", status: "beta" as const, color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" },
                 { name: "DieSchulApp", status: "soon" as const, color: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400" },
               ].map((platform) => (
                 <div
                   key={platform.name}
                   className={`relative flex flex-col items-center gap-2 rounded-xl border p-5 text-center ${
-                    platform.status === "live" ? "" : "opacity-60"
+                    platform.status === "soon" ? "opacity-60" : ""
                   }`}
                 >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-bold ${platform.color}`}>
@@ -111,6 +116,11 @@ export default function LandingPage() {
                     <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
                       <Check className="h-2.5 w-2.5" />
                       Verfügbar
+                    </span>
+                  ) : platform.status === "beta" ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                      <Check className="h-2.5 w-2.5" />
+                      Beta
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">

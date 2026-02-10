@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { trackEvent } from "@/components/analytics";
 
 export function StickyCTABar() {
   const [visible, setVisible] = useState(false);
@@ -25,7 +26,11 @@ export function StickyCTABar() {
         visible ? "translate-y-0" : "translate-y-full"
       }`}
     >
-      <Link href="/register" className="block">
+      <Link
+        href="/register"
+        className="block"
+        onClick={() => trackEvent("cta_click", { location: "sticky_bar" })}
+      >
         <Button size="lg" className="w-full gap-2 text-base font-semibold">
           Jetzt ausprobieren
           <ArrowRight className="h-4 w-4" />
