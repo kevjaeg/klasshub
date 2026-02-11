@@ -274,7 +274,7 @@ export default async function DashboardPage() {
                       Verbinde die Schulplattform oder lade Demo-Daten zum Ausprobieren.
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
                     <Link href={`/children/${child.id}`}>
                       <Button size="sm" variant="outline">
                         Einrichten
