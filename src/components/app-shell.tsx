@@ -124,14 +124,14 @@ export function AppShell({ userName, userEmail, children }: AppShellProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-3 py-1 text-xs transition-colors ${
+                className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 py-1 text-[10px] sm:text-xs transition-colors ${
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <item.icon className="h-5 w-5" />
-                {item.label}
+                <span className="truncate">{item.label}</span>
               </Link>
             );
           })}

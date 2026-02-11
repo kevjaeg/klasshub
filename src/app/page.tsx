@@ -8,7 +8,7 @@ import { ForceLightMode } from "@/components/force-light-mode";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col overflow-x-hidden">
       <ForceLightMode />
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -19,12 +19,12 @@ export default function LandingPage() {
             </div>
             <span className="text-lg font-semibold">KlassHub</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2">
             <Link href="/login">
-              <Button variant="ghost" size="sm">Anmelden</Button>
+              <Button variant="ghost" size="sm" className="px-2 sm:px-3">Anmelden</Button>
             </Link>
             <Link href="/register">
-              <Button size="sm">Registrieren</Button>
+              <Button size="sm" className="px-2 sm:px-3">Registrieren</Button>
             </Link>
           </div>
         </div>
