@@ -39,6 +39,11 @@ export async function GET(request: Request) {
     }
 
     const data = await res.json();
+
+    if (data.error?.code === -6003) {
+      return NextResponse.json({ error: "Zu viele Ergebnisse. Bitte gib einen genaueren Schulnamen ein." }, { status: 422 });
+    }
+
     const schools = data.result?.schools ?? [];
 
     const mapped = schools.map(
