@@ -346,7 +346,7 @@ export function ScreenshotCarousel() {
       </div>
 
       {/* Labels */}
-      <div className="flex justify-center gap-2">
+      <div className="flex flex-wrap justify-center gap-2">
         {SLIDES.map((slide, i) => (
           <button
             key={slide.label}
