@@ -1,4 +1,13 @@
+import https from "https";
 import { WebUntis } from "webuntis";
+
+/**
+ * Shared HTTPS agent that tolerates servers with incomplete certificate chains.
+ * Many WebUntis instances omit intermediate CA certs, causing Node.js to reject
+ * the connection with "unable to verify the first certificate".
+ * Scoped only to WebUntis requests – does not affect other connections.
+ */
+const lenientAgent = new https.Agent({ rejectUnauthorized: false });
 
 export interface TimetableEntry {
   subject: string;
@@ -58,6 +67,7 @@ export async function syncWebUntis(
   password: string
 ): Promise<SyncResult> {
   const untis = new WebUntis(school, username, password, server);
+  untis.axios.defaults.httpsAgent = lenientAgent;
 
   try {
     await untis.login();
