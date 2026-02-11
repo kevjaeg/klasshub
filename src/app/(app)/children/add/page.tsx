@@ -12,6 +12,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { PLATFORMS } from "@/lib/platforms/registry";
 import type { PlatformId, PlatformInfo } from "@/lib/platforms/types";
+import { WebUntisSchoolSearch } from "@/components/webuntis-school-search";
 
 const platformList = Object.values(PLATFORMS);
 
@@ -160,7 +161,25 @@ export default function AddChildPage() {
             </div>
 
             {/* Platform-specific fields */}
-            {selectedPlatformInfo && selectedPlatformInfo.fields.length > 0 && (
+            {selectedPlatform === "webuntis" && (
+              <div className="rounded-lg border bg-muted/50 p-4 space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium">WebUntis-Verbindung</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Suche deine Schule, um die Verbindung automatisch einzurichten.
+                  </p>
+                </div>
+                <WebUntisSchoolSearch
+                  onSelect={({ server, school }) => {
+                    setPlatformConfig((prev) => ({ ...prev, server, school }));
+                  }}
+                />
+              </div>
+            )}
+
+            {selectedPlatformInfo &&
+              selectedPlatform !== "webuntis" &&
+              selectedPlatformInfo.fields.length > 0 && (
               <div className="rounded-lg border bg-muted/50 p-4 space-y-4">
                 <div>
                   <h3 className="text-sm font-medium">{selectedPlatformInfo.name}-Verbindung</h3>
