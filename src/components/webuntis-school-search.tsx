@@ -55,7 +55,12 @@ export function WebUntisSchoolSearch({
       const res = await fetch(
         `/api/webuntis-schools?q=${encodeURIComponent(q)}`
       );
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error ?? "Suche fehlgeschlagen. Versuche es erneut.");
+        setResults([]);
+        return;
+      }
       const data: WebUntisSchool[] = await res.json();
       setResults(data);
       setShowDropdown(true);
