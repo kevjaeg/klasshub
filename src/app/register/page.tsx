@@ -55,6 +55,10 @@ export default function RegisterPage() {
       return;
     }
 
+    // Sign out immediately so the middleware doesn't redirect to /dashboard
+    // before the user can see the "confirm your email" message.
+    await supabase.auth.signOut();
+
     setSuccess(true);
     setLoading(false);
   }
