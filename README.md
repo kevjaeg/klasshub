@@ -1,4 +1,5 @@
 <p align="center">
+  <img src="https://img.shields.io/github/actions/workflow/status/kevinjaegle/klasshub/ci.yml?style=flat-square&label=CI" alt="CI" />
   <img src="https://img.shields.io/github/license/kevinjaegle/klasshub?style=flat-square" alt="License" />
   <img src="https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/Supabase-Database%20%2B%20Auth-3ECF8E?style=flat-square&logo=supabase" alt="Supabase" />
@@ -83,7 +84,6 @@ Die App läuft dann unter [http://localhost:3000](http://localhost:3000).
 | `npm run build` | Production-Build (inkl. Service Worker) |
 | `npm run typecheck` | TypeScript prüfen |
 | `npm run lint` | ESLint |
-| `npm run test` | Tests ausführen |
 | `npm run db:push` | Schema zu Supabase pushen |
 | `npm run db:reset` | Supabase-Datenbank zurücksetzen |
 
@@ -186,7 +186,7 @@ Beiträge sind willkommen! Besonders gesucht:
 3. Änderungen committen
 4. Pull Request öffnen
 
-Bitte stelle sicher, dass `npm run typecheck` und `npm run lint` ohne Fehler durchlaufen.
+Bitte stelle sicher, dass `npm run typecheck` und `npm run lint` ohne Fehler durchlaufen. CI prüft beides automatisch bei jedem Pull Request.
 
 ## Lizenz
 
