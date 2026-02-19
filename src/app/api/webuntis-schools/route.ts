@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 
+// Cache school search results for 5 minutes to reduce load on WebUntis API
+const CACHE_TTL = 5 * 60_000;
+const searchCache = new Map<string, { data: unknown; expires: number }>();
+
 export async function GET(request: Request) {
   const supabase = await createClient();
 
@@ -23,6 +27,12 @@ export async function GET(request: Request) {
 
   if (!query || query.length < 3) {
     return NextResponse.json([]);
+  }
+
+  const cacheKey = query.toLowerCase();
+  const cached = searchCache.get(cacheKey);
+  if (cached && cached.expires > Date.now()) {
+    return NextResponse.json(cached.data);
   }
 
   try {
@@ -66,6 +76,7 @@ export async function GET(request: Request) {
       })
     );
 
+    searchCache.set(cacheKey, { data: mapped, expires: Date.now() + CACHE_TTL });
     return NextResponse.json(mapped);
   } catch {
     return NextResponse.json(
