@@ -12,20 +12,26 @@ export function OfflineBanner() {
   // Track when we go offline
   useEffect(() => {
     if (isOffline) {
-      setLastOnlineAt(new Date());
-      setShowReconnected(false);
+      const t = setTimeout(() => {
+        setLastOnlineAt(new Date());
+        setShowReconnected(false);
+      }, 0);
+      return () => clearTimeout(t);
     }
   }, [isOffline]);
 
   // Show brief "reconnected" message when coming back online
   useEffect(() => {
     if (isOnline && lastOnlineAt) {
-      setShowReconnected(true);
-      const timer = setTimeout(() => {
+      const showTimer = setTimeout(() => setShowReconnected(true), 0);
+      const hideTimer = setTimeout(() => {
         setShowReconnected(false);
         setLastOnlineAt(null);
       }, 3000);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(showTimer);
+        clearTimeout(hideTimer);
+      };
     }
   }, [isOnline, lastOnlineAt]);
 

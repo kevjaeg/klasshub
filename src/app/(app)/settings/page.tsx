@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +16,8 @@ import {
   type NotificationSettings,
 } from "@/lib/notifications";
 
+const noop = () => () => {};
+
 export default function SettingsPage() {
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
@@ -29,14 +31,16 @@ export default function SettingsPage() {
     messages: true,
     homework: true,
   });
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(noop, () => true, () => false);
 
   useEffect(() => {
-    setMounted(true);
-    if ("Notification" in window) {
-      setNotifPermission(Notification.permission);
-    }
-    setNotifSettings(getNotificationSettings());
+    const t = setTimeout(() => {
+      if ("Notification" in window) {
+        setNotifPermission(Notification.permission);
+      }
+      setNotifSettings(getNotificationSettings());
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   async function handleLogout() {
