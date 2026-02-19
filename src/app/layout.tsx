@@ -10,7 +10,7 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://klasshub.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://klasshub.de";
 
 export const metadata: Metadata = {
   title: {
