@@ -41,10 +41,13 @@ export async function GET(
 
   const ical = generateICalFeed(child.name, lessons, substitutions);
 
+  // Sanitize filename to prevent header injection
+  const safeName = child.name.replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, "").slice(0, 50) || "stundenplan";
+
   return new NextResponse(ical, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${child.name}-stundenplan.ics"`,
+      "Content-Disposition": `attachment; filename="${safeName}-stundenplan.ics"`,
     },
   });
 }
