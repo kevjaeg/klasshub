@@ -47,7 +47,7 @@ public/workbox-*.js
 *.tsbuildinfo
 next-env.d.ts
 
-# claude code
+# local config
 .claude/
 
 # supabase local
