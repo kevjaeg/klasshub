@@ -4,6 +4,13 @@ import { getAdapter } from "@/lib/platforms/registry";
 import type { PlatformId } from "@/lib/platforms/types";
 import { dowBerlin } from "@/lib/date-utils";
 import { safeString, safeSyncResult } from "@/lib/sanitize";
+import { z } from "zod";
+
+const syncSchema = z.object({
+  childId: z.string().uuid(),
+  username: z.string().min(1).max(200),
+  password: z.string().min(1).max(500),
+});
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -17,27 +24,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
   }
 
-  let body: {
-    childId: string;
-    username: string;
-    password: string;
-  };
-
+  let parsed;
   try {
-    body = await request.json();
+    parsed = syncSchema.parse(await request.json());
   } catch {
     return NextResponse.json({ error: "Ungültige Anfrage" }, { status: 400 });
   }
 
-  const { childId } = body;
-  let { username, password } = body;
-
-  if (!childId || !username || !password) {
-    return NextResponse.json(
-      { error: "Alle Felder müssen ausgefüllt sein" },
-      { status: 400 }
-    );
-  }
+  const { childId } = parsed;
+  let { username, password } = parsed;
 
   // Fetch child and verify ownership (RLS does this too, but let's be explicit)
   const { data: child, error: childError } = await supabase
@@ -98,8 +93,6 @@ export async function POST(request: Request) {
       // Explicitly overwrite credentials before GC
       username = "\0".repeat(username.length);
       password = "\0".repeat(password.length);
-      body.username = "\0".repeat(body.username.length);
-      body.password = "\0".repeat(body.password.length);
     }
 
     // Defensive: ensure arrays even if adapter returns malformed data
@@ -153,7 +146,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Lesson insert error:", insertError);
-        errors.push({ category: "Stunden", message: insertError.message });
+        errors.push({ category: "Stunden", message: "Speichern fehlgeschlagen" });
       } else {
         newInsertedIds.lessons = (inserted || []).map((r) => r.id);
       }
@@ -181,7 +174,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Substitution insert error:", insertError);
-        errors.push({ category: "Vertretungen", message: insertError.message });
+        errors.push({ category: "Vertretungen", message: "Speichern fehlgeschlagen" });
       } else {
         newInsertedIds.substitutions = (inserted || []).map((r) => r.id);
       }
@@ -206,7 +199,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Message insert error:", insertError);
-        errors.push({ category: "Nachrichten", message: insertError.message });
+        errors.push({ category: "Nachrichten", message: "Speichern fehlgeschlagen" });
       } else {
         newInsertedIds.messages = (inserted || []).map((r) => r.id);
       }
@@ -234,7 +227,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Homework insert error:", insertError);
-        errors.push({ category: "Hausaufgaben", message: insertError.message });
+        errors.push({ category: "Hausaufgaben", message: "Speichern fehlgeschlagen" });
       } else {
         newInsertedIds.homework = (inserted || []).map((r) => r.id);
       }
@@ -320,25 +313,32 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Unbekannter Fehler";
+      error instanceof Error ? error.message : "";
 
-    // Common auth errors
+    console.error("Sync error:", error);
+
+    // Surface known user-facing errors with safe messages
     if (message.includes("401") || message.includes("auth") || message.includes("fehlgeschlagen")) {
       return NextResponse.json(
-        { error: message.includes("fehlgeschlagen") ? message : "Zugangsdaten sind ungültig" },
+        { error: "Zugangsdaten sind ungültig" },
         { status: 401 }
       );
     }
     if (message.includes("ENOTFOUND") || message.includes("network") || message.includes("erreichbar")) {
       return NextResponse.json(
-        { error: message.includes("erreichbar") ? message : "Server nicht erreichbar. Prüfe die Verbindungsdaten." },
+        { error: "Server nicht erreichbar. Prüfe die Verbindungsdaten." },
+        { status: 502 }
+      );
+    }
+    if (message.includes("TLS-Zertifikat")) {
+      return NextResponse.json(
+        { error: message },
         { status: 502 }
       );
     }
 
-    console.error("Sync error:", message);
     return NextResponse.json(
-      { error: "Sync fehlgeschlagen: " + message },
+      { error: "Sync fehlgeschlagen. Bitte versuche es später erneut." },
       { status: 500 }
     );
   }
