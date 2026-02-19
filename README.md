@@ -84,6 +84,7 @@ Die App läuft dann unter [http://localhost:3000](http://localhost:3000).
 | `npm run build` | Production-Build (inkl. Service Worker) |
 | `npm run typecheck` | TypeScript prüfen |
 | `npm run lint` | ESLint |
+| `npm run test` | Jest Unit-Tests |
 | `npm run db:push` | Schema zu Supabase pushen |
 | `npm run db:reset` | Supabase-Datenbank zurücksetzen |
 
@@ -186,7 +187,7 @@ Beiträge sind willkommen! Besonders gesucht:
 3. Änderungen committen
 4. Pull Request öffnen
 
-Bitte stelle sicher, dass `npm run typecheck` und `npm run lint` ohne Fehler durchlaufen. CI prüft beides automatisch bei jedem Pull Request.
+Bitte stelle sicher, dass `npm run typecheck`, `npm run lint` und `npm run test` ohne Fehler durchlaufen. CI prüft alles automatisch bei jedem Pull Request.
 
 ## Lizenz
 
