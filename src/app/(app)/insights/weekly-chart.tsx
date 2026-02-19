@@ -24,7 +24,6 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       <div className="flex items-end gap-2 h-32">
         {data.map((d) => {
           const totalHeight = (d.total / maxValue) * 100;
-          const completedHeight = d.total > 0 ? (d.completed / d.total) * totalHeight : 0;
           const isToday = d.date === today;
 
           return (

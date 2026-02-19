@@ -20,10 +20,6 @@ interface SyncEvent extends ExtendableEvent {
   readonly tag: string;
 }
 
-interface SyncManager {
-  register(tag: string): Promise<void>;
-}
-
 declare const self: ServiceWorkerGlobalScope & WorkerGlobalScope;
 
 const serwist = new Serwist({
