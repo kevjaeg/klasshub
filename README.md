@@ -194,4 +194,4 @@ Bitte stelle sicher, dass `npm run typecheck` und `npm run lint` ohne Fehler dur
 
 ## Gehostet nutzen
 
-Du willst KlassHub einfach nur nutzen, ohne selbst zu hosten? Die gehostete Version findest du unter [klasshub.app](https://klasshub.app).
+Du willst KlassHub einfach nur nutzen, ohne selbst zu hosten? Die gehostete Version findest du unter [klasshub.de](https://klasshub.de).
