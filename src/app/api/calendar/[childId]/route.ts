@@ -41,13 +41,16 @@ export async function GET(
 
   const ical = generateICalFeed(child.name, lessons, substitutions);
 
-  // Sanitize filename: strip characters that enable header injection
-  const safeName = child.name.replace(/["\\\r\n;]/g, "").trim().slice(0, 50) || "stundenplan";
+  // Build Content-Disposition with RFC 5987 filename* for Unicode support.
+  // ASCII-only filename as fallback; filename* carries the full UTF-8 name.
+  const trimmedName = child.name.trim().slice(0, 50) || "stundenplan";
+  const asciiName = trimmedName.replace(/[^\x20-\x7E]/g, "_").replace(/["\\]/g, "_");
+  const utf8Name = encodeURIComponent(trimmedName).replace(/'/g, "%27");
 
   return new NextResponse(ical, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${safeName}-stundenplan.ics"`,
+      "Content-Disposition": `attachment; filename="${asciiName}-stundenplan.ics"; filename*=UTF-8''${utf8Name}-stundenplan.ics`,
     },
   });
 }
