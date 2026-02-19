@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, LayoutDashboard, CalendarDays, Settings, LogOut, Users, Mail, ClipboardList, Sun, Moon, BarChart3 } from "lucide-react";
+import { GraduationCap, LayoutDashboard, CalendarDays, Settings, LogOut, Users, ClipboardList, Sun, Moon, BarChart3 } from "lucide-react";
 import { OfflineBanner } from "@/components/offline-banner";
 
 interface AppShellProps {

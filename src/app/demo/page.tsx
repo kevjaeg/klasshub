@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, AlertTriangle, AlertCircle, Mail, ClipboardList, ChevronRight, Sparkles, GraduationCap } from "lucide-react";
+import { ArrowRight, AlertTriangle, AlertCircle, Mail, ClipboardList, Sparkles, GraduationCap } from "lucide-react";
 import { ForceLightMode } from "@/components/force-light-mode";
 import { DEMO_LESSONS, generateDemoSubstitutions, generateDemoMessages, generateDemoHomework } from "@/lib/webuntis/demo-data";
 
@@ -36,16 +36,8 @@ export default function DemoPage() {
     .sort((a, b) => a.lessonNumber - b.lessonNumber);
 
   const todaySubs = substitutions.filter((s) => s.date === todayDate);
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowStr = tomorrowDate.toISOString().split("T")[0];
-  const tomorrowSubs = substitutions.filter((s) => s.date === tomorrowStr);
-
   const openHomework = homework.filter((h) => !h.completed);
   const todayCancelled = todaySubs.filter((s) => s.type === "cancelled").length;
-
-  // Show weekday 1 (Monday) if it's the weekend for the demo
-  const displayDow = todayDow <= 5 ? todayDow : 1;
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
