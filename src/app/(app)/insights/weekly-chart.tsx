@@ -27,7 +27,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
           const isToday = d.date === today;
 
           return (
-            <div key={d.day} className="flex-1 flex flex-col items-center gap-1">
+            <div key={d.day} className="flex-1 flex flex-col items-center gap-1" aria-label={`${d.label}: ${d.completed} von ${d.total} erledigt`}>
               {/* Count label */}
               {d.total > 0 && (
                 <span className="text-[10px] text-muted-foreground font-medium">
