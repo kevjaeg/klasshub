@@ -18,11 +18,12 @@ export async function GET(
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
   }
 
-  // Fetch child
+  // Fetch child and verify ownership (RLS also enforces this, but be explicit)
   const { data: child } = await supabase
     .from("children")
     .select("*")
     .eq("id", childId)
+    .eq("user_id", user.id)
     .single();
 
   if (!child) {

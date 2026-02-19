@@ -47,5 +47,8 @@ public/workbox-*.js
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
-.env*.local
+# claude code
+.claude/
+
+# supabase local
+supabase/.temp/
