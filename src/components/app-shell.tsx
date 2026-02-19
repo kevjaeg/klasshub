@@ -124,6 +124,8 @@ export function AppShell({ userName, userEmail, children }: AppShellProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-label={item.label}
+                aria-current={isActive ? "page" : undefined}
                 className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 py-1 text-[10px] sm:text-xs transition-colors ${
                   isActive
                     ? "text-primary"

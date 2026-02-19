@@ -21,8 +21,17 @@ export function MessageList({ messages, childMap }: MessageListProps) {
         return (
           <Card
             key={msg.id}
+            role="button"
+            tabIndex={0}
+            aria-expanded={isExpanded}
             className="cursor-pointer transition-colors hover:bg-muted/50"
             onClick={() => setExpandedId(isExpanded ? null : msg.id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setExpandedId(isExpanded ? null : msg.id);
+              }
+            }}
           >
             <CardContent className="px-4 py-3">
               <div className="flex items-start gap-3">
