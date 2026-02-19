@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -10,6 +11,11 @@ export async function GET(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
+  }
+
+  const { allowed } = rateLimit(`schools:${user.id}`, 20, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "Zu viele Anfragen. Bitte warte kurz." }, { status: 429 });
   }
 
   const { searchParams } = new URL(request.url);

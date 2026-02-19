@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { DEMO_LESSONS, generateDemoSubstitutions, generateDemoMessages, generateDemoHomework } from "@/lib/webuntis/demo-data";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 
 const demoSchema = z.object({
   childId: z.string().uuid(),
@@ -16,6 +17,11 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
+  }
+
+  const { allowed } = rateLimit(`demo:${user.id}`, 5, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "Zu viele Anfragen. Bitte warte kurz." }, { status: 429 });
   }
 
   let parsed;

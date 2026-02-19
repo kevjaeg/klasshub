@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 
 const toggleSchema = z.object({
   homeworkId: z.string().uuid(),
@@ -16,6 +17,11 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
+  }
+
+  const { allowed } = rateLimit(`hw-toggle:${user.id}`, 30, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "Zu viele Anfragen. Bitte warte kurz." }, { status: 429 });
   }
 
   let parsed;
