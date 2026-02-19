@@ -29,7 +29,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Ungültige Anfrage" }, { status: 400 });
   }
 
-  let { childId, username, password } = body;
+  const { childId } = body;
+  let { username, password } = body;
 
   if (!childId || !username || !password) {
     return NextResponse.json(
