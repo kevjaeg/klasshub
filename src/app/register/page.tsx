@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const router = useRouter();
   const supabase = createClient();
 
   async function handleRegister(e: React.FormEvent) {
@@ -33,8 +31,14 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 8) {
-      setError("Das Passwort muss mindestens 8 Zeichen lang sein.");
+    if (password.length < 10) {
+      setError("Das Passwort muss mindestens 10 Zeichen lang sein.");
+      setLoading(false);
+      return;
+    }
+
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) {
+      setError("Das Passwort muss Groß- und Kleinbuchstaben sowie eine Zahl enthalten.");
       setLoading(false);
       return;
     }
@@ -134,11 +138,11 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="Mindestens 8 Zeichen"
+                placeholder="Mindestens 10 Zeichen"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={8}
+                minLength={10}
                 autoComplete="new-password"
               />
             </div>

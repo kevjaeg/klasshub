@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { DEMO_LESSONS, generateDemoSubstitutions, generateDemoMessages, generateDemoHomework } from "@/lib/webuntis/demo-data";
+import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
+
+const demoSchema = z.object({
+  childId: z.string().uuid(),
+});
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -13,14 +19,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
   }
 
-  let body: { childId: string };
+  const { allowed } = rateLimit(`demo:${user.id}`, 5, 60_000);
+  if (!allowed) {
+    return NextResponse.json({ error: "Zu viele Anfragen. Bitte warte kurz." }, { status: 429 });
+  }
+
+  let parsed;
   try {
-    body = await request.json();
+    parsed = demoSchema.parse(await request.json());
   } catch {
     return NextResponse.json({ error: "Ungültige Anfrage" }, { status: 400 });
   }
 
-  const { childId } = body;
+  const { childId } = parsed;
 
   // Verify child exists and belongs to user
   const { data: child, error: childError } = await supabase

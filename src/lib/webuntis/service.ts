@@ -1,13 +1,4 @@
-import https from "https";
 import { WebUntis } from "webuntis";
-
-/**
- * Shared HTTPS agent that tolerates servers with incomplete certificate chains.
- * Many WebUntis instances omit intermediate CA certs, causing Node.js to reject
- * the connection with "unable to verify the first certificate".
- * Scoped only to WebUntis requests – does not affect other connections.
- */
-const lenientAgent = new https.Agent({ rejectUnauthorized: false });
 
 export interface TimetableEntry {
   subject: string;
@@ -67,7 +58,6 @@ export async function syncWebUntis(
   password: string
 ): Promise<SyncResult> {
   const untis = new WebUntis(school, username, password, server);
-  untis.axios.defaults.httpsAgent = lenientAgent;
 
   try {
     await untis.login();
@@ -181,6 +171,20 @@ export async function syncWebUntis(
     } catch {
       // Ignore logout errors
     }
+
+    // Surface a clear message when the school's WebUntis server has a broken TLS certificate
+    const msg = error instanceof Error ? error.message : "";
+    if (
+      msg.includes("unable to verify the first certificate") ||
+      msg.includes("UNABLE_TO_VERIFY_LEAF_SIGNATURE") ||
+      msg.includes("self signed certificate") ||
+      msg.includes("certificate has expired")
+    ) {
+      throw new Error(
+        "Das TLS-Zertifikat des WebUntis-Servers ist ungültig. Bitte wende dich an deine Schule."
+      );
+    }
+
     throw error;
   }
 }
