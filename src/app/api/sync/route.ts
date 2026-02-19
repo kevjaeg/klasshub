@@ -146,7 +146,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Lesson insert error:", insertError);
-        errors.push({ category: "Stunden", message: insertError.message });
+        errors.push({ category: "Stunden", message: "Speichern fehlgeschlagen" });
       } else {
         newInsertedIds.lessons = (inserted || []).map((r) => r.id);
       }
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Substitution insert error:", insertError);
-        errors.push({ category: "Vertretungen", message: insertError.message });
+        errors.push({ category: "Vertretungen", message: "Speichern fehlgeschlagen" });
       } else {
         newInsertedIds.substitutions = (inserted || []).map((r) => r.id);
       }
@@ -199,7 +199,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Message insert error:", insertError);
-        errors.push({ category: "Nachrichten", message: insertError.message });
+        errors.push({ category: "Nachrichten", message: "Speichern fehlgeschlagen" });
       } else {
         newInsertedIds.messages = (inserted || []).map((r) => r.id);
       }
@@ -227,7 +227,7 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Homework insert error:", insertError);
-        errors.push({ category: "Hausaufgaben", message: insertError.message });
+        errors.push({ category: "Hausaufgaben", message: "Speichern fehlgeschlagen" });
       } else {
         newInsertedIds.homework = (inserted || []).map((r) => r.id);
       }
@@ -313,25 +313,32 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Unbekannter Fehler";
+      error instanceof Error ? error.message : "";
 
-    // Common auth errors
+    console.error("Sync error:", error);
+
+    // Surface known user-facing errors with safe messages
     if (message.includes("401") || message.includes("auth") || message.includes("fehlgeschlagen")) {
       return NextResponse.json(
-        { error: message.includes("fehlgeschlagen") ? message : "Zugangsdaten sind ungültig" },
+        { error: "Zugangsdaten sind ungültig" },
         { status: 401 }
       );
     }
     if (message.includes("ENOTFOUND") || message.includes("network") || message.includes("erreichbar")) {
       return NextResponse.json(
-        { error: message.includes("erreichbar") ? message : "Server nicht erreichbar. Prüfe die Verbindungsdaten." },
+        { error: "Server nicht erreichbar. Prüfe die Verbindungsdaten." },
+        { status: 502 }
+      );
+    }
+    if (message.includes("TLS-Zertifikat")) {
+      return NextResponse.json(
+        { error: message },
         { status: 502 }
       );
     }
 
-    console.error("Sync error:", message);
     return NextResponse.json(
-      { error: "Sync fehlgeschlagen: " + message },
+      { error: "Sync fehlgeschlagen. Bitte versuche es später erneut." },
       { status: 500 }
     );
   }
