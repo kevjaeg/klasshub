@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
+
+const toggleSchema = z.object({
+  homeworkId: z.string().uuid(),
+  completed: z.boolean(),
+});
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -12,18 +18,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
   }
 
-  let body: { homeworkId: string; completed: boolean };
+  let parsed;
   try {
-    body = await request.json();
+    parsed = toggleSchema.parse(await request.json());
   } catch {
     return NextResponse.json({ error: "Ungültige Anfrage" }, { status: 400 });
   }
 
-  const { homeworkId, completed } = body;
-
-  if (!homeworkId || typeof completed !== "boolean") {
-    return NextResponse.json({ error: "Ungültige Anfrage" }, { status: 400 });
-  }
+  const { homeworkId, completed } = parsed;
 
   // Verify ownership: homework → child → user (RLS also enforces this, but be explicit)
   const { data: hw } = await supabase

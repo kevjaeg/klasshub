@@ -4,6 +4,13 @@ import { getAdapter } from "@/lib/platforms/registry";
 import type { PlatformId } from "@/lib/platforms/types";
 import { dowBerlin } from "@/lib/date-utils";
 import { safeString, safeSyncResult } from "@/lib/sanitize";
+import { z } from "zod";
+
+const syncSchema = z.object({
+  childId: z.string().uuid(),
+  username: z.string().min(1).max(200),
+  password: z.string().min(1).max(500),
+});
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -17,27 +24,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
   }
 
-  let body: {
-    childId: string;
-    username: string;
-    password: string;
-  };
-
+  let parsed;
   try {
-    body = await request.json();
+    parsed = syncSchema.parse(await request.json());
   } catch {
     return NextResponse.json({ error: "Ungültige Anfrage" }, { status: 400 });
   }
 
-  const { childId } = body;
-  let { username, password } = body;
-
-  if (!childId || !username || !password) {
-    return NextResponse.json(
-      { error: "Alle Felder müssen ausgefüllt sein" },
-      { status: 400 }
-    );
-  }
+  const { childId } = parsed;
+  let { username, password } = parsed;
 
   // Fetch child and verify ownership (RLS does this too, but let's be explicit)
   const { data: child, error: childError } = await supabase
@@ -98,8 +93,6 @@ export async function POST(request: Request) {
       // Explicitly overwrite credentials before GC
       username = "\0".repeat(username.length);
       password = "\0".repeat(password.length);
-      body.username = "\0".repeat(body.username.length);
-      body.password = "\0".repeat(body.password.length);
     }
 
     // Defensive: ensure arrays even if adapter returns malformed data
