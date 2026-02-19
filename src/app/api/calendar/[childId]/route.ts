@@ -45,7 +45,7 @@ export async function GET(
   // ASCII-only filename as fallback; filename* carries the full UTF-8 name.
   const trimmedName = child.name.trim().slice(0, 50) || "stundenplan";
   const asciiName = trimmedName.replace(/[^\x20-\x7E]/g, "_").replace(/["\\]/g, "_");
-  const utf8Name = encodeURIComponent(trimmedName).replace(/'/g, "%27");
+  const utf8Name = encodeURIComponent(trimmedName).replace(/[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 
   return new NextResponse(ical, {
     headers: {
