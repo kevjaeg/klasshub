@@ -41,8 +41,8 @@ export async function GET(
 
   const ical = generateICalFeed(child.name, lessons, substitutions);
 
-  // Sanitize filename to prevent header injection
-  const safeName = child.name.replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, "").slice(0, 50) || "stundenplan";
+  // Sanitize filename: strip characters that enable header injection
+  const safeName = child.name.replace(/["\\\r\n;]/g, "").trim().slice(0, 50) || "stundenplan";
 
   return new NextResponse(ical, {
     headers: {
