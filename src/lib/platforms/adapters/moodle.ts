@@ -5,6 +5,7 @@ import type {
   LessonData,
   HomeworkData,
 } from "../types";
+import { DiagnosticError, fetchWithDiagnostic } from "../sync-diagnostic";
 
 // Moodle Web Services API adapter
 // Uses the official REST API at https://<instance>/webservice/rest/server.php
@@ -36,15 +37,15 @@ export class MoodleAdapter implements PlatformAdapter {
     // Step 2: Get user info to find enrolled courses
     const userId = await this.getUserId(baseUrl, token);
 
-    // Step 3: Fetch courses and assignments in parallel
-    const [courses, homework] = await Promise.all([
+    // Step 3: Fetch courses and assignments with diagnostics
+    const [c, h] = await Promise.all([
       this.fetchCourses(baseUrl, token, userId),
       this.fetchAssignments(baseUrl, token),
     ]);
 
     // Convert courses to "lessons" (Moodle doesn't have a timetable,
     // but we can show enrolled courses as lesson entries)
-    const lessons: LessonData[] = courses.map((course, index) => ({
+    const lessons: LessonData[] = c.data.map((course, index) => ({
       subject: course.name,
       teacher: null,
       room: null,
@@ -54,10 +55,14 @@ export class MoodleAdapter implements PlatformAdapter {
       endTime: "08:45",
     }));
 
+    const diagnostics = [c.diagnostic, h.diagnostic]
+      .filter(d => d.code !== "ok");
+
     return {
       lessons,
       substitutions: [], // Moodle doesn't have substitutions
-      homework,
+      homework: h.data,
+      diagnostics: diagnostics.length > 0 ? diagnostics : undefined,
     };
   }
 
@@ -109,12 +114,8 @@ export class MoodleAdapter implements PlatformAdapter {
     return data.userid as number;
   }
 
-  private async fetchCourses(
-    baseUrl: string,
-    token: string,
-    userId: number
-  ): Promise<{ id: number; name: string }[]> {
-    try {
+  private fetchCourses(baseUrl: string, token: string, userId: number) {
+    return fetchWithDiagnostic<{ id: number; name: string }[]>("lessons", async () => {
       const data = await this.callApi(
         baseUrl,
         token,
@@ -122,29 +123,26 @@ export class MoodleAdapter implements PlatformAdapter {
         { userid: userId }
       );
 
-      if (!Array.isArray(data)) return [];
+      if (!Array.isArray(data))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected courses array, got ${typeof data}`);
 
       return data.map((course: { id: number; fullname?: string; shortname?: string }) => ({
         id: course.id,
         name: course.fullname || course.shortname || "Kurs",
       }));
-    } catch {
-      return [];
-    }
+    });
   }
 
-  private async fetchAssignments(
-    baseUrl: string,
-    token: string
-  ): Promise<HomeworkData[]> {
-    try {
+  private fetchAssignments(baseUrl: string, token: string) {
+    return fetchWithDiagnostic<HomeworkData[]>("homework", async () => {
       const data = await this.callApi(
         baseUrl,
         token,
         "mod_assign_get_assignments"
       );
 
-      if (!Array.isArray(data?.courses)) return [];
+      if (!Array.isArray(data?.courses))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected data.courses array, got ${typeof data?.courses}`);
 
       const homework: HomeworkData[] = [];
 
@@ -170,9 +168,7 @@ export class MoodleAdapter implements PlatformAdapter {
       }
 
       return homework;
-    } catch {
-      return [];
-    }
+    });
   }
 
   private async callApi(

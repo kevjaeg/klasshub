@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAdapter } from "@/lib/platforms/registry";
-import type { PlatformId } from "@/lib/platforms/types";
+import type { PlatformId, SyncDiagnostic } from "@/lib/platforms/types";
 import { dowBerlin } from "@/lib/date-utils";
 import { safeString, safeSyncResult } from "@/lib/sanitize";
 import { z } from "zod";
@@ -97,6 +97,37 @@ export async function POST(request: Request) {
 
     // Defensive: ensure arrays even if adapter returns malformed data
     const result = safeSyncResult(rawResult) as typeof rawResult;
+
+    // ── Diagnostics: log + build fetchWarnings for client ──
+    const fetchWarnings: string[] = [];
+    if (result.diagnostics && Array.isArray(result.diagnostics)) {
+      const categoryLabels: Record<string, string> = {
+        lessons: "Stundenplan",
+        substitutions: "Vertretungen",
+        messages: "Nachrichten",
+        homework: "Hausaufgaben",
+      };
+
+      for (const d of result.diagnostics as SyncDiagnostic[]) {
+        const label = categoryLabels[d.category] || d.category;
+        console.warn(
+          `[sync] ${platformId}/${d.category}: ${d.code}${d.httpStatus ? ` (HTTP ${d.httpStatus})` : ""}${d.detail ? ` – ${d.detail}` : ""}`
+        );
+
+        switch (d.code) {
+          case "http_error":
+            fetchWarnings.push(`${label} konnte nicht abgerufen werden (Fehler ${d.httpStatus || "unbekannt"})`);
+            break;
+          case "shape_mismatch":
+            fetchWarnings.push(`${label}: Unerwartetes Datenformat`);
+            break;
+          case "network_error":
+            fetchWarnings.push(`${label}: Verbindungsfehler`);
+            break;
+          // ok + not_supported → no warning
+        }
+      }
+    }
 
     // ── Phase 1: Snapshot old data IDs + preserve user edits ──
     const [oldLessons, oldSubs, oldMsgs, oldHw, existingHomework] = await Promise.all([
@@ -310,6 +341,7 @@ export async function POST(request: Request) {
       oldHomeworkCount: oldHwIds.length,
       warning,
       errors: errors.length > 0 ? errors : undefined,
+      fetchWarnings: fetchWarnings.length > 0 ? fetchWarnings : undefined,
     });
   } catch (error) {
     const message =

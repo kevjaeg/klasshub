@@ -77,6 +77,12 @@ export function SyncDialog({ childId, childName, platformId }: SyncDialogProps) 
         );
       }
 
+      if (data.fetchWarnings?.length > 0) {
+        for (const w of data.fetchWarnings) {
+          toast.warning(w, { duration: 6000 });
+        }
+      }
+
       if (data.warning) {
         toast.warning(data.warning, { duration: 5000 });
       }

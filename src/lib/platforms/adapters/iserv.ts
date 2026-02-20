@@ -7,6 +7,7 @@ import type {
   MessageData,
   HomeworkData,
 } from "../types";
+import { DiagnosticError, fetchWithDiagnostic } from "../sync-diagnostic";
 
 // IServ REST API adapter
 // IServ exposes a JSON API at https://<school-domain>/iserv/...
@@ -36,15 +37,24 @@ export class IServAdapter implements PlatformAdapter {
     );
 
     try {
-      // Step 2: Fetch data in parallel
-      const [lessons, substitutions, messages, homework] = await Promise.all([
+      // Step 2: Fetch data in parallel with diagnostics
+      const [l, s, m, h] = await Promise.all([
         this.fetchTimetable(baseUrl, sessionCookie),
         this.fetchSubstitutions(baseUrl, sessionCookie),
         this.fetchMessages(baseUrl, sessionCookie),
         this.fetchHomework(baseUrl, sessionCookie),
       ]);
 
-      return { lessons, substitutions, messages, homework };
+      const diagnostics = [l.diagnostic, s.diagnostic, m.diagnostic, h.diagnostic]
+        .filter(d => d.code !== "ok");
+
+      return {
+        lessons: l.data,
+        substitutions: s.data,
+        messages: m.data,
+        homework: h.data,
+        diagnostics: diagnostics.length > 0 ? diagnostics : undefined,
+      };
     } finally {
       // Always logout to clean up the session
       await this.logout(baseUrl, sessionCookie).catch(() => {});
@@ -94,24 +104,20 @@ export class IServAdapter implements PlatformAdapter {
     });
   }
 
-  private async fetchTimetable(
-    baseUrl: string,
-    cookie: string
-  ): Promise<LessonData[]> {
-    try {
-      // IServ timetable API: /iserv/timetable/table/current
-      const response = await fetch(
-        `${baseUrl}/iserv/timetable/api/current.json`,
-        { headers: { Cookie: cookie, Accept: "application/json" } }
-      );
+  private fetchTimetable(baseUrl: string, cookie: string) {
+    const url = `${baseUrl}/iserv/timetable/api/current.json`;
+    return fetchWithDiagnostic<LessonData[]>("lessons", async () => {
+      const response = await fetch(url, {
+        headers: { Cookie: cookie, Accept: "application/json" },
+      });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `GET ${url} → ${response.status}`);
 
       const data = await response.json();
 
-      // IServ timetable format varies by school config
-      // Common structure: array of entries with day, period, subject, teacher, room
-      if (!Array.isArray(data?.entries)) return [];
+      if (!Array.isArray(data?.entries))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected data.entries array, got ${typeof data?.entries}`);
 
       return data.entries.map(
         (entry: {
@@ -132,26 +138,23 @@ export class IServAdapter implements PlatformAdapter {
           endTime: entry.endTime || "08:45",
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
-  private async fetchSubstitutions(
-    baseUrl: string,
-    cookie: string
-  ): Promise<SubstitutionData[]> {
-    try {
-      const response = await fetch(
-        `${baseUrl}/iserv/timetable/api/substitutions.json`,
-        { headers: { Cookie: cookie, Accept: "application/json" } }
-      );
+  private fetchSubstitutions(baseUrl: string, cookie: string) {
+    const url = `${baseUrl}/iserv/timetable/api/substitutions.json`;
+    return fetchWithDiagnostic<SubstitutionData[]>("substitutions", async () => {
+      const response = await fetch(url, {
+        headers: { Cookie: cookie, Accept: "application/json" },
+      });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `GET ${url} → ${response.status}`);
 
       const data = await response.json();
 
-      if (!Array.isArray(data?.substitutions)) return [];
+      if (!Array.isArray(data?.substitutions))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected data.substitutions array, got ${typeof data?.substitutions}`);
 
       return data.substitutions.map(
         (s: {
@@ -176,27 +179,23 @@ export class IServAdapter implements PlatformAdapter {
           infoText: s.info || null,
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
-  private async fetchMessages(
-    baseUrl: string,
-    cookie: string
-  ): Promise<MessageData[]> {
-    try {
-      // IServ messages/email API
-      const response = await fetch(
-        `${baseUrl}/iserv/mail/api/message/list?folder=INBOX&length=20`,
-        { headers: { Cookie: cookie, Accept: "application/json" } }
-      );
+  private fetchMessages(baseUrl: string, cookie: string) {
+    const url = `${baseUrl}/iserv/mail/api/message/list?folder=INBOX&length=20`;
+    return fetchWithDiagnostic<MessageData[]>("messages", async () => {
+      const response = await fetch(url, {
+        headers: { Cookie: cookie, Accept: "application/json" },
+      });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `GET ${url} → ${response.status}`);
 
       const data = await response.json();
 
-      if (!Array.isArray(data?.data)) return [];
+      if (!Array.isArray(data?.data))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected data.data array, got ${typeof data?.data}`);
 
       return data.data.map(
         (msg: {
@@ -216,27 +215,23 @@ export class IServAdapter implements PlatformAdapter {
           read: msg.seen ?? false,
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
-  private async fetchHomework(
-    baseUrl: string,
-    cookie: string
-  ): Promise<HomeworkData[]> {
-    try {
-      // IServ exercise/homework module
-      const response = await fetch(
-        `${baseUrl}/iserv/exercise/api/exercises.json`,
-        { headers: { Cookie: cookie, Accept: "application/json" } }
-      );
+  private fetchHomework(baseUrl: string, cookie: string) {
+    const url = `${baseUrl}/iserv/exercise/api/exercises.json`;
+    return fetchWithDiagnostic<HomeworkData[]>("homework", async () => {
+      const response = await fetch(url, {
+        headers: { Cookie: cookie, Accept: "application/json" },
+      });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `GET ${url} → ${response.status}`);
 
       const data = await response.json();
 
-      if (!Array.isArray(data?.exercises)) return [];
+      if (!Array.isArray(data?.exercises))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected data.exercises array, got ${typeof data?.exercises}`);
 
       return data.exercises.map(
         (hw: {
@@ -255,9 +250,7 @@ export class IServAdapter implements PlatformAdapter {
           completed: hw.completed ?? false,
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
   private mapSubstitutionType(
