@@ -18,7 +18,7 @@ export function safeSyncResult(data: unknown): {
   substitutions: unknown[];
   messages: unknown[];
   homework: unknown[];
-  diagnostics: unknown[] | undefined;
+  diagnostics?: unknown[];
 } {
   const obj = data && typeof data === "object" ? data as Record<string, unknown> : {};
   return {
