@@ -1,5 +1,6 @@
 import type { PlatformAdapter, PlatformCredentials, SyncResult } from "../types";
 import { syncWebUntis } from "@/lib/webuntis/service";
+import { validatePlatformUrl } from "../validate-url";
 
 export class WebUntisAdapter implements PlatformAdapter {
   readonly id = "webuntis" as const;
@@ -14,6 +15,8 @@ export class WebUntisAdapter implements PlatformAdapter {
     if (!server || !school) {
       throw new Error("WebUntis Server und Schulkürzel sind erforderlich");
     }
+
+    validatePlatformUrl(`https://${server}`);
 
     const result = await syncWebUntis(
       server,

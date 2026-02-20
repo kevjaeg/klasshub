@@ -6,6 +6,7 @@ import type {
   HomeworkData,
 } from "../types";
 import { DiagnosticError, fetchWithDiagnostic } from "../sync-diagnostic";
+import { validatePlatformUrl } from "../validate-url";
 
 // Moodle Web Services API adapter
 // Uses the official REST API at https://<instance>/webservice/rest/server.php
@@ -26,6 +27,8 @@ export class MoodleAdapter implements PlatformAdapter {
     const baseUrl = instanceUrl.startsWith("http")
       ? instanceUrl.replace(/\/$/, "")
       : `https://${instanceUrl}`.replace(/\/$/, "");
+
+    validatePlatformUrl(baseUrl);
 
     // Step 1: Get API token via login
     const token = await this.getToken(
