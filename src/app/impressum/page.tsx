@@ -16,10 +16,10 @@ export default function ImpressumPage() {
 
       <div className="prose prose-sm max-w-none space-y-4 text-muted-foreground">
         <h2 className="text-lg font-semibold text-foreground">Angaben gemäß § 5 TMG</h2>
-        <p>[Dein vollständiger Name]<br />[Straße und Hausnummer]<br />[PLZ und Ort]</p>
+        <p>Kevin Jägle<br />Eschbach 8<br />77716 Fischerbach</p>
 
         <h2 className="text-lg font-semibold text-foreground">Kontakt</h2>
-        <p>E-Mail: [deine@email.de]</p>
+        <p>E-Mail: info@klasshub.de</p>
 
         <h2 className="text-lg font-semibold text-foreground">Haftungsausschluss</h2>
         <p>
