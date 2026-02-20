@@ -16,7 +16,7 @@ export default function DatenschutzPage() {
 
       <div className="prose prose-sm max-w-none space-y-4 text-muted-foreground">
         <h2 className="text-lg font-semibold text-foreground">1. Verantwortlicher</h2>
-        <p>[Dein Name / Firma]<br />[Adresse]<br />[E-Mail]</p>
+        <p>Kevin Jägle<br />Eschbach 8, 77716 Fischerbach<br />info@klasshub.de</p>
 
         <h2 className="text-lg font-semibold text-foreground">2. Welche Daten wir erheben</h2>
         <p>Wir erheben und verarbeiten folgende Daten:</p>
@@ -62,7 +62,7 @@ export default function DatenschutzPage() {
 
         <h2 className="text-lg font-semibold text-foreground">7. Kontakt</h2>
         <p>
-          Bei Fragen zum Datenschutz kontaktiere uns unter: [E-Mail einfügen]
+          Bei Fragen zum Datenschutz kontaktiere uns unter: info@klasshub.de
         </p>
       </div>
     </div>
