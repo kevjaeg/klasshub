@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Shield, Smartphone, Zap, Clock, Users, ArrowRight, Check } from "lucide-react";
+import { GraduationCap, Shield, Smartphone, Zap, Clock, Users, ArrowRight, Check, Github } from "lucide-react";
 import { ScreenshotCarousel } from "@/components/screenshot-carousel";
 import { StickyCTABar } from "@/components/sticky-cta-bar";
 import { TrackedLink } from "@/components/tracked-link";
@@ -20,6 +20,11 @@ export default function LandingPage() {
             <span className="text-lg font-semibold">KlassHub</span>
           </div>
           <div className="flex gap-1 sm:gap-2">
+            <a href="https://github.com/kevjaeg/klasshub" target="_blank" rel="noopener noreferrer">
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="GitHub">
+                <Github className="h-4 w-4" />
+              </Button>
+            </a>
             <Link href="/login">
               <Button variant="ghost" size="sm" className="px-2 sm:px-3">Anmelden</Button>
             </Link>
@@ -175,9 +180,12 @@ export default function LandingPage() {
               <div className="flex gap-3 rounded-xl border p-5">
                 <Shield className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <div>
-                  <h3 className="font-semibold text-sm">DSGVO von Tag 1</h3>
+                  <h3 className="font-semibold text-sm">Open Source &amp; DSGVO</h3>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Passwörter werden nie gespeichert. Daten in der EU. Konto jederzeit löschbar.
+                    Passwörter werden nie gespeichert. Daten in der EU. Konto jederzeit löschbar.{" "}
+                    <a href="https://github.com/kevjaeg/klasshub" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                      Quellcode auf GitHub <Github className="inline h-3 w-3" />
+                    </a>
                   </p>
                 </div>
               </div>
@@ -257,6 +265,10 @@ export default function LandingPage() {
             KlassHub
           </div>
           <div className="flex gap-4 text-sm text-muted-foreground">
+            <a href="https://github.com/kevjaeg/klasshub" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-foreground hover:underline">
+              <Github className="h-3.5 w-3.5" />
+              GitHub
+            </a>
             <Link href="/datenschutz" className="hover:text-foreground hover:underline">
               Datenschutz
             </Link>
