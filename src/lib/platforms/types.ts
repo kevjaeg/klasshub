@@ -25,11 +25,26 @@ export interface PlatformCredentials {
   [key: string]: string; // platform-specific fields (server, school, instance URL, etc.)
 }
 
+export type SyncDiagnosticCode =
+  | "ok"              // Fetch OK (0 items ist normal)
+  | "http_error"      // Non-2xx Response
+  | "shape_mismatch"  // JSON ok, aber unerwartete Struktur
+  | "network_error"   // fetch() selbst gescheitert
+  | "not_supported";  // Platform bietet diese Kategorie nicht an
+
+export interface SyncDiagnostic {
+  category: "lessons" | "substitutions" | "messages" | "homework";
+  code: SyncDiagnosticCode;
+  httpStatus?: number;
+  detail?: string;
+}
+
 export interface SyncResult {
   lessons: LessonData[];
   substitutions: SubstitutionData[];
   messages?: MessageData[];
   homework?: HomeworkData[];
+  diagnostics?: SyncDiagnostic[];
 }
 
 export interface LessonData {

@@ -5,6 +5,7 @@ import type {
   LessonData,
   SubstitutionData,
 } from "../types";
+import { DiagnosticError, fetchWithDiagnostic } from "../sync-diagnostic";
 
 // Schulmanager Online API adapter
 // Uses the undocumented REST API at https://login.schulmanager-online.de/
@@ -26,13 +27,20 @@ export class SchulmanagerAdapter implements PlatformAdapter {
     );
 
     try {
-      // Step 2: Fetch timetable and substitutions
-      const [lessons, substitutions] = await Promise.all([
+      // Step 2: Fetch timetable and substitutions with diagnostics
+      const [l, s] = await Promise.all([
         this.fetchTimetable(token),
         this.fetchSubstitutions(token),
       ]);
 
-      return { lessons, substitutions };
+      const diagnostics = [l.diagnostic, s.diagnostic]
+        .filter(d => d.code !== "ok");
+
+      return {
+        lessons: l.data,
+        substitutions: s.data,
+        diagnostics: diagnostics.length > 0 ? diagnostics : undefined,
+      };
     } finally {
       // Token is discarded when this scope ends – no logout endpoint needed
     }
@@ -63,14 +71,14 @@ export class SchulmanagerAdapter implements PlatformAdapter {
     return token;
   }
 
-  private async fetchTimetable(token: string): Promise<LessonData[]> {
-    try {
-      // Schulmanager uses a batch/call-based API
+  private fetchTimetable(token: string) {
+    const url = `${API_BASE}/api/calls`;
+    return fetchWithDiagnostic<LessonData[]>("lessons", async () => {
       const today = new Date();
       const monday = new Date(today);
       monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
 
-      const response = await fetch(`${API_BASE}/api/calls`, {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,12 +98,14 @@ export class SchulmanagerAdapter implements PlatformAdapter {
         }),
       });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `POST ${url} (get-actual-lessons) → ${response.status}`);
 
       const data = await response.json();
       const results = data?.results?.[0]?.result;
 
-      if (!Array.isArray(results?.lessons)) return [];
+      if (!Array.isArray(results?.lessons))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected results[0].result.lessons array, got ${typeof results?.lessons}`);
 
       return results.lessons.map(
         (entry: {
@@ -121,20 +131,17 @@ export class SchulmanagerAdapter implements PlatformAdapter {
           endTime: entry.endTime || "08:45",
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
-  private async fetchSubstitutions(
-    token: string
-  ): Promise<SubstitutionData[]> {
-    try {
+  private fetchSubstitutions(token: string) {
+    const url = `${API_BASE}/api/calls`;
+    return fetchWithDiagnostic<SubstitutionData[]>("substitutions", async () => {
       const today = new Date();
       const nextWeek = new Date(today);
       nextWeek.setDate(today.getDate() + 7);
 
-      const response = await fetch(`${API_BASE}/api/calls`, {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,12 +162,14 @@ export class SchulmanagerAdapter implements PlatformAdapter {
         }),
       });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `POST ${url} (get-substitution-plan) → ${response.status}`);
 
       const data = await response.json();
       const results = data?.results?.[0]?.result;
 
-      if (!Array.isArray(results?.substitutions)) return [];
+      if (!Array.isArray(results?.substitutions))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected results[0].result.substitutions array, got ${typeof results?.substitutions}`);
 
       return results.substitutions.map(
         (s: {
@@ -185,9 +194,7 @@ export class SchulmanagerAdapter implements PlatformAdapter {
           infoText: s.comment || null,
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
   private mapType(

@@ -18,6 +18,7 @@ export function safeSyncResult(data: unknown): {
   substitutions: unknown[];
   messages: unknown[];
   homework: unknown[];
+  diagnostics: unknown[] | undefined;
 } {
   const obj = data && typeof data === "object" ? data as Record<string, unknown> : {};
   return {
@@ -25,5 +26,6 @@ export function safeSyncResult(data: unknown): {
     substitutions: Array.isArray(obj.substitutions) ? obj.substitutions : [],
     messages: Array.isArray(obj.messages) ? obj.messages : [],
     homework: Array.isArray(obj.homework) ? obj.homework : [],
+    diagnostics: Array.isArray(obj.diagnostics) ? obj.diagnostics : undefined,
   };
 }

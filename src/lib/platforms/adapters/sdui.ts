@@ -7,6 +7,7 @@ import type {
   MessageData,
   HomeworkData,
 } from "../types";
+import { DiagnosticError, fetchWithDiagnostic } from "../sync-diagnostic";
 
 // Sdui REST API adapter
 // Sdui uses a GraphQL-style REST API at https://gateway.sdui.app/
@@ -33,15 +34,24 @@ export class SduiAdapter implements PlatformAdapter {
       // Step 2: Get user info for timetable context
       const userId = await this.getUserId(token);
 
-      // Step 3: Fetch data in parallel
-      const [lessons, substitutions, messages, homework] = await Promise.all([
+      // Step 3: Fetch data in parallel with diagnostics
+      const [l, s, m, h] = await Promise.all([
         this.fetchTimetable(token, userId),
         this.fetchSubstitutions(token, userId),
         this.fetchMessages(token),
         this.fetchHomework(token),
       ]);
 
-      return { lessons, substitutions, messages, homework };
+      const diagnostics = [l.diagnostic, s.diagnostic, m.diagnostic, h.diagnostic]
+        .filter(d => d.code !== "ok");
+
+      return {
+        lessons: l.data,
+        substitutions: s.data,
+        messages: m.data,
+        homework: h.data,
+        diagnostics: diagnostics.length > 0 ? diagnostics : undefined,
+      };
     } finally {
       // Token is short-lived and discarded after scope
     }
@@ -81,31 +91,28 @@ export class SduiAdapter implements PlatformAdapter {
     return data?.data?.id as number;
   }
 
-  private async fetchTimetable(
-    token: string,
-    userId: number
-  ): Promise<LessonData[]> {
-    try {
-      const today = new Date();
-      const monday = new Date(today);
-      monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+  private fetchTimetable(token: string, userId: number) {
+    const today = new Date();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+    const url = `${API_BASE}/users/${userId}/timetable?from=${monday.toISOString().split("T")[0]}`;
 
-      const response = await fetch(
-        `${API_BASE}/users/${userId}/timetable?from=${monday.toISOString().split("T")[0]}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        }
-      );
+    return fetchWithDiagnostic<LessonData[]>("lessons", async () => {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `GET ${url} → ${response.status}`);
 
       const data = await response.json();
       const entries = data?.data?.lessons || data?.data || [];
 
-      if (!Array.isArray(entries)) return [];
+      if (!Array.isArray(entries))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected data.data array or data.data.lessons array, got ${typeof entries}`);
 
       return entries.map(
         (entry: {
@@ -131,36 +138,31 @@ export class SduiAdapter implements PlatformAdapter {
           endTime: entry.time_end?.slice(0, 5) || "08:45",
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
-  private async fetchSubstitutions(
-    token: string,
-    userId: number
-  ): Promise<SubstitutionData[]> {
-    try {
-      const today = new Date();
-      const nextWeek = new Date(today);
-      nextWeek.setDate(today.getDate() + 7);
+  private fetchSubstitutions(token: string, userId: number) {
+    const today = new Date();
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    const url = `${API_BASE}/users/${userId}/substitutions?from=${today.toISOString().split("T")[0]}&to=${nextWeek.toISOString().split("T")[0]}`;
 
-      const response = await fetch(
-        `${API_BASE}/users/${userId}/substitutions?from=${today.toISOString().split("T")[0]}&to=${nextWeek.toISOString().split("T")[0]}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        }
-      );
+    return fetchWithDiagnostic<SubstitutionData[]>("substitutions", async () => {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `GET ${url} → ${response.status}`);
 
       const data = await response.json();
       const entries = data?.data || [];
 
-      if (!Array.isArray(entries)) return [];
+      if (!Array.isArray(entries))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected data.data array, got ${typeof entries}`);
 
       return entries.map(
         (s: {
@@ -185,26 +187,27 @@ export class SduiAdapter implements PlatformAdapter {
           infoText: s.comment || null,
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
-  private async fetchMessages(token: string): Promise<MessageData[]> {
-    try {
-      const response = await fetch(`${API_BASE}/notifications?type=news`, {
+  private fetchMessages(token: string) {
+    const url = `${API_BASE}/notifications?type=news`;
+    return fetchWithDiagnostic<MessageData[]>("messages", async () => {
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
         },
       });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `GET ${url} → ${response.status}`);
 
       const data = await response.json();
       const entries = data?.data || [];
 
-      if (!Array.isArray(entries)) return [];
+      if (!Array.isArray(entries))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected data.data array, got ${typeof entries}`);
 
       return entries.slice(0, 20).map(
         (msg: {
@@ -225,26 +228,27 @@ export class SduiAdapter implements PlatformAdapter {
           read: !!msg.read_at,
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
-  private async fetchHomework(token: string): Promise<HomeworkData[]> {
-    try {
-      const response = await fetch(`${API_BASE}/tasks?filter=student`, {
+  private fetchHomework(token: string) {
+    const url = `${API_BASE}/tasks?filter=student`;
+    return fetchWithDiagnostic<HomeworkData[]>("homework", async () => {
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: "application/json",
         },
       });
 
-      if (!response.ok) return [];
+      if (!response.ok)
+        throw new DiagnosticError("http_error", response.status, `GET ${url} → ${response.status}`);
 
       const data = await response.json();
       const entries = data?.data || [];
 
-      if (!Array.isArray(entries)) return [];
+      if (!Array.isArray(entries))
+        throw new DiagnosticError("shape_mismatch", undefined, `Expected data.data array, got ${typeof entries}`);
 
       return entries.map(
         (hw: {
@@ -264,9 +268,7 @@ export class SduiAdapter implements PlatformAdapter {
           completed: hw.completed ?? false,
         })
       );
-    } catch {
-      return [];
-    }
+    });
   }
 
   private mapType(
