@@ -26,6 +26,6 @@ export function safeSyncResult(data: unknown): {
     substitutions: Array.isArray(obj.substitutions) ? obj.substitutions : [],
     messages: Array.isArray(obj.messages) ? obj.messages : [],
     homework: Array.isArray(obj.homework) ? obj.homework : [],
-    diagnostics: Array.isArray(obj.diagnostics) ? obj.diagnostics : undefined,
+    ...(Array.isArray(obj.diagnostics) ? { diagnostics: obj.diagnostics } : {}),
   };
 }

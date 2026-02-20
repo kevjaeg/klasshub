@@ -191,7 +191,7 @@ export class MoodleAdapter implements PlatformAdapter {
     );
 
     if (!response.ok) {
-      throw new Error(`Moodle API-Fehler: ${response.status}`);
+      throw new DiagnosticError("http_error", response.status, `Moodle API-Fehler: ${response.status}`);
     }
 
     const data = await response.json();
