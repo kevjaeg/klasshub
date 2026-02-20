@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, AlertTriangle, AlertCircle, Mail, ClipboardList, Sparkles, GraduationCap } from "lucide-react";
+import { ArrowRight, AlertTriangle, AlertCircle, Mail, ClipboardList, Sparkles, GraduationCap, LayoutDashboard, CalendarDays, Users, BarChart3 } from "lucide-react";
 import { ForceLightMode } from "@/components/force-light-mode";
 import { DEMO_LESSONS, generateDemoSubstitutions, generateDemoMessages, generateDemoHomework } from "@/lib/webuntis/demo-data";
 
@@ -275,6 +275,29 @@ export default function DemoPage() {
           </Card>
         </div>
       </main>
+
+      {/* Bottom Navigation (demo) */}
+      <nav className="sticky bottom-0 border-t bg-background/95 backdrop-blur">
+        <div className="mx-auto flex max-w-2xl items-center justify-around px-4 py-2">
+          {[
+            { label: "Übersicht", icon: LayoutDashboard, active: true },
+            { label: "Stundenplan", icon: CalendarDays, active: false },
+            { label: "Aufgaben", icon: ClipboardList, active: false },
+            { label: "Statistik", icon: BarChart3, active: false },
+            { label: "Kinder", icon: Users, active: false },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 py-1 text-[10px] sm:text-xs ${
+                item.active ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="truncate">{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
