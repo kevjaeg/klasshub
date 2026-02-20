@@ -8,6 +8,7 @@ import type {
   HomeworkData,
 } from "../types";
 import { DiagnosticError, fetchWithDiagnostic } from "../sync-diagnostic";
+import { validatePlatformUrl } from "../validate-url";
 
 // IServ REST API adapter
 // IServ exposes a JSON API at https://<school-domain>/iserv/...
@@ -28,6 +29,8 @@ export class IServAdapter implements PlatformAdapter {
     const baseUrl = serverUrl.startsWith("http")
       ? serverUrl
       : `https://${serverUrl}`;
+
+    validatePlatformUrl(baseUrl);
 
     // Step 1: Login to get session cookie
     const sessionCookie = await this.login(

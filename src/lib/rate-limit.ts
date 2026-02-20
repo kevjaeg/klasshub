@@ -1,7 +1,14 @@
 /**
  * Simple in-memory rate limiter for API routes.
  * Tracks request timestamps per key (typically user ID).
- * Note: resets on server restart and is per-instance only.
+ *
+ * Limitations:
+ * - Resets on server restart
+ * - Per-instance only (not shared across multiple server instances)
+ *
+ * The sync endpoint uses DB-based rate limiting (last_synced_at) and is not
+ * affected. Only hw-toggle and hw-notes use this limiter.
+ * TODO: migrate to Supabase-based rate limiting when scaling to multiple instances.
  */
 
 interface RateLimitEntry {
