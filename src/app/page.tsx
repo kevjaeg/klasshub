@@ -8,6 +8,7 @@ import { HeroSection } from "@/components/landing/hero-section";
 import { ProblemSection } from "@/components/landing/problem-section";
 import { PlatformsSection } from "@/components/landing/platforms-section";
 import { FeaturesSection } from "@/components/landing/features-section";
+import { TestimonialsSection } from "@/components/landing/testimonials-section";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { CTASection } from "@/components/landing/cta-section";
 import { ShareSection } from "@/components/landing/share-section";
@@ -25,6 +26,7 @@ export default function LandingPage() {
         <ProblemSection />
         <PlatformsSection />
         <FeaturesSection />
+        <TestimonialsSection />
         <PricingSection />
         <FAQSection />
         <CTASection />
