@@ -7,6 +7,7 @@ import { PlatformsSection } from "@/components/landing/platforms-section";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { CTASection } from "@/components/landing/cta-section";
+import { ShareSection } from "@/components/landing/share-section";
 import { LandingFooter } from "@/components/landing/landing-footer";
 
 export default function LandingPage() {
@@ -21,6 +22,7 @@ export default function LandingPage() {
         <FeaturesSection />
         <PricingSection />
         <CTASection />
+        <ShareSection />
       </main>
       <StickyCTABar />
       <LandingFooter />
