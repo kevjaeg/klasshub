@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GraduationCap, LayoutDashboard, CalendarDays, Settings, LogOut, Users, ClipboardList, Sun, Moon, BarChart3 } from "lucide-react";
+import { GraduationCap, LayoutDashboard, CalendarDays, Settings, LogOut, Users, ClipboardList, Sun, Moon, BarChart3, Share2 } from "lucide-react";
 import { OfflineBanner } from "@/components/offline-banner";
 
 interface AppShellProps {
@@ -91,6 +91,20 @@ export function AppShell({ userName, userEmail, children }: AppShellProps) {
                   <p className="text-xs text-muted-foreground">{userEmail}</p>
                 </div>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    const url = "https://klasshub.de?ref=dashboard_share";
+                    const text = "Hey, ich hab KlassHub gefunden – eine App die WebUntis, Schulmanager & Co. in einem Dashboard vereint. Schau mal:";
+                    if (navigator.share) {
+                      navigator.share({ title: "KlassHub", text, url });
+                    } else {
+                      navigator.clipboard.writeText(url);
+                    }
+                  }}
+                >
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Empfehlen
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings" className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
