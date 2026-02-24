@@ -7,7 +7,6 @@ import { TrackedLink } from "@/components/tracked-link";
 import { ShimmerBadge } from "./shimmer-badge";
 import { GradientText } from "./gradient-text";
 import { FloatingScreenshot } from "./floating-screenshot";
-import Link from "next/link";
 
 const stagger = {
   hidden: {},
@@ -75,11 +74,11 @@ export function HeroSection() {
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </TrackedLink>
-            <Link href="/demo">
+            <TrackedLink href="/demo" event="cta_click" props={{ location: "hero_demo" }}>
               <Button size="lg" variant="outline" className="gap-2 rounded-full px-8 text-base">
-                Demo ansehen
+                Demo ansehen — ohne Account
               </Button>
-            </Link>
+            </TrackedLink>
           </motion.div>
 
           <motion.p variants={fadeUp} className="text-sm text-muted-foreground">

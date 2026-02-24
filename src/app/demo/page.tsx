@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,9 +7,10 @@ import { ArrowRight, AlertTriangle, AlertCircle, Mail, ClipboardList, Sparkles, 
 import { ForceLightMode } from "@/components/force-light-mode";
 import { DEMO_LESSONS, generateDemoSubstitutions, generateDemoMessages, generateDemoHomework } from "@/lib/webuntis/demo-data";
 
-export const metadata = {
-  title: "KlassHub Demo – So sieht dein Dashboard aus",
-  description: "Interaktive Demo von KlassHub. Sieh dir den Stundenplan, Vertretungen und Hausaufgaben an – ohne Registrierung.",
+export const metadata: Metadata = {
+  title: "Demo – Schul-Dashboard kostenlos testen",
+  description:
+    "Teste KlassHub kostenlos ohne Account. Sieh Stundenplan, Vertretungen und Nachrichten in einem Dashboard – so wie echte Eltern es nutzen.",
 };
 
 const DAY_NAMES = ["", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];

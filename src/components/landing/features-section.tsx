@@ -12,7 +12,6 @@ const features = [
     tint: "bg-blue-50",
     iconColor: "text-blue-600",
     iconBg: "bg-blue-100",
-    span: "sm:col-span-2",
   },
   {
     icon: Clock,
@@ -21,7 +20,6 @@ const features = [
     tint: "bg-orange-50",
     iconColor: "text-orange-600",
     iconBg: "bg-orange-100",
-    span: "",
   },
   {
     icon: Users,
@@ -30,7 +28,6 @@ const features = [
     tint: "bg-violet-50",
     iconColor: "text-violet-600",
     iconBg: "bg-violet-100",
-    span: "",
   },
   {
     icon: Shield,
@@ -39,7 +36,6 @@ const features = [
     tint: "bg-green-50",
     iconColor: "text-green-600",
     iconBg: "bg-green-100",
-    span: "",
     extra: (
       <a href="https://github.com/kevjaeg/klasshub" target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
         <Github className="h-3.5 w-3.5" />
@@ -54,7 +50,6 @@ const features = [
     tint: "bg-indigo-50",
     iconColor: "text-indigo-600",
     iconBg: "bg-indigo-100",
-    span: "sm:col-span-2",
   },
 ];
 
@@ -71,7 +66,7 @@ const item = {
 export function FeaturesSection() {
   return (
     <section className="bg-muted/20 px-6 py-24">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-4xl">
         <AnimatedSection className="mb-12 text-center">
           <h2 className="text-3xl font-bold tracking-tight">Was KlassHub kann</h2>
         </AnimatedSection>
@@ -81,26 +76,22 @@ export function FeaturesSection() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+          className="flex flex-wrap justify-center gap-4 [&>*]:w-full [&>*]:sm:w-[calc(50%-0.5rem)] [&>*]:lg:w-[calc(33.333%-0.75rem)]"
         >
           {features.map((f) => (
             <motion.div
               key={f.title}
               variants={item}
-              className={`group rounded-2xl ${f.tint} p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${f.span}`}
+              className={`group rounded-2xl ${f.tint} p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg`}
             >
-              <div className="flex gap-4">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${f.iconBg}`}>
-                  <f.icon className={`h-5 w-5 ${f.iconColor}`} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">{f.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    {f.description}
-                  </p>
-                  {f.extra}
-                </div>
+              <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${f.iconBg}`}>
+                <f.icon className={`h-5 w-5 ${f.iconColor}`} />
               </div>
+              <h3 className="text-lg font-semibold text-foreground">{f.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                {f.description}
+              </p>
+              {f.extra}
             </motion.div>
           ))}
         </motion.div>

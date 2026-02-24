@@ -5,12 +5,12 @@ import { Check } from "lucide-react";
 import { AnimatedSection } from "./animated-section";
 
 const platforms = [
-  { name: "WebUntis", short: "WE", color: "bg-orange-100 text-orange-700 ring-orange-200", status: "live" as const, span: "sm:col-span-2" },
-  { name: "Schulmanager", short: "SC", color: "bg-green-100 text-green-700 ring-green-200", status: "beta" as const, span: "" },
-  { name: "IServ", short: "IS", color: "bg-blue-100 text-blue-700 ring-blue-200", status: "beta" as const, span: "" },
-  { name: "Moodle", short: "MO", color: "bg-yellow-100 text-yellow-700 ring-yellow-200", status: "beta" as const, span: "" },
-  { name: "Sdui", short: "SD", color: "bg-purple-100 text-purple-700 ring-purple-200", status: "beta" as const, span: "" },
-  { name: "DieSchulApp", short: "DS", color: "bg-rose-100 text-rose-700 ring-rose-200", status: "soon" as const, span: "" },
+  { name: "WebUntis", short: "WE", color: "bg-orange-100 text-orange-700 ring-orange-200", status: "live" as const },
+  { name: "Schulmanager", short: "SC", color: "bg-green-100 text-green-700 ring-green-200", status: "beta" as const },
+  { name: "IServ", short: "IS", color: "bg-blue-100 text-blue-700 ring-blue-200", status: "beta" as const },
+  { name: "Moodle", short: "MO", color: "bg-yellow-100 text-yellow-700 ring-yellow-200", status: "beta" as const },
+  { name: "Sdui", short: "SD", color: "bg-purple-100 text-purple-700 ring-purple-200", status: "beta" as const },
+  { name: "DieSchulApp", short: "DS", color: "bg-rose-100 text-rose-700 ring-rose-200", status: "soon" as const },
 ];
 
 const container = {
@@ -39,15 +39,15 @@ export function PlatformsSection() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+          className="grid grid-cols-2 gap-4 sm:grid-cols-3"
         >
           {platforms.map((p) => (
             <motion.div
               key={p.name}
               variants={item}
               className={`group relative flex flex-col items-center gap-3 rounded-2xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
-                p.span
-              } ${p.status === "soon" ? "opacity-50" : ""}`}
+                p.status === "soon" ? "opacity-50" : ""
+              }`}
             >
               <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-sm font-bold ring-2 ${p.color}`}>
                 {p.short}
