@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Loader2 } from "lucide-react";
 import { ForceLightMode } from "@/components/force-light-mode";
+import { GoogleLoginButton } from "@/components/google-login-button";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -94,6 +95,17 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">oder</span>
+            </div>
+          </div>
+
+          <GoogleLoginButton />
 
           <div className="mt-4 text-center text-sm text-muted-foreground">
             Noch kein Konto?{" "}
