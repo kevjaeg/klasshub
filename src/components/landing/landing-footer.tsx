@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GraduationCap, Github } from "lucide-react";
+import { GitHubStars } from "@/components/github-stars";
 
 export function LandingFooter() {
   return (
@@ -13,6 +14,7 @@ export function LandingFooter() {
           <a href="https://github.com/kevjaeg/klasshub" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 transition-colors hover:text-foreground">
             <Github className="h-3.5 w-3.5" />
             GitHub
+            <GitHubStars />
           </a>
           <span className="text-border">&middot;</span>
           <Link href="/datenschutz" className="transition-colors hover:text-foreground">
