@@ -1,5 +1,6 @@
 import { ForceLightMode } from "@/components/force-light-mode";
 import { StickyCTABar } from "@/components/sticky-cta-bar";
+import { StructuredData } from "@/components/landing/structured-data";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { HeroSection } from "@/components/landing/hero-section";
 import { ProblemSection } from "@/components/landing/problem-section";
@@ -13,6 +14,7 @@ import { LandingFooter } from "@/components/landing/landing-footer";
 export default function LandingPage() {
   return (
     <div className="flex min-h-dvh flex-col overflow-x-hidden">
+      <StructuredData />
       <ForceLightMode />
       <LandingHeader />
       <main className="flex-1">
